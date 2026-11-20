@@ -1,0 +1,2688 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>SQL Server Cheat Sheet pour débutants — par Iheb HAFDALLAH</title>
+    <meta name="description"
+        content="Cheat sheet SQL Server (T-SQL) pour débutants : bases de données, tables, SELECT, jointures, fonctions, procédures, transactions, sécurité. Tous les exemples à copier.">
+    <meta name="author" content="Iheb HAFDALLAH">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body id="top">
+
+    <!-- ================= NAVBAR ================= -->
+    <header class="topbar sticky-top">
+        <nav class="navbar navbar-expand-lg container p-3" aria-label="Navigation principale">
+            <a class="brand" href="#top"><span class="brand-mark">SQL</span>Server <span
+                    class="brand-sub d-none d-sm-inline">Cheat Sheet</span></a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav"
+                aria-controls="nav" aria-expanded="false" aria-label="Ouvrir le menu">Menu</button>
+            <div class="collapse navbar-collapse" id="nav">
+                <ul class="pillnav mx-lg-auto">
+                    <li><a href="#demarrer" data-group="g-bases" class="active">Bases</a></li>
+                    <li><a href="#tables" data-group="g-tables">Tables</a></li>
+                    <li><a href="#select" data-group="g-requetes">Requêtes</a></li>
+                    <li><a href="#fonctions" data-group="g-fonctions">Fonctions</a></li>
+                    <li><a href="#objets" data-group="g-avance">Avancé</a></li>
+                    <li><a href="#admin" data-group="g-admin">Admin</a></li>
+                </ul>
+                <div class="search"><input id="q" type="search" placeholder="Rechercher… (touche /)"
+                        aria-label="Rechercher dans le cheat sheet" autocomplete="off"></div>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <div class="container result-info" id="resultInfo" hidden></div>
+
+        <!-- ================= HERO ================= -->
+        <section class="hero">
+            <div class="container">
+                <span class="tag">Pour les débutants · T-SQL · SSMS</span>
+                <h1 class="display">SQL Server<br>Cheat Sheet</h1>
+                <p class="lead-w">Toutes les commandes à connaître pour écrire tes premières requêtes, du
+                    <code>CREATE TABLE</code> aux transactions, avec des exemples prêts à copier, du plus simple au plus
+                    avancé.
+                </p>
+                <div class="cta">
+                    <a class="btn-lime" href="#jeu-de-donnees">Commencer</a>
+                    <a class="link-u" href="#jointures">Comprendre les JOIN</a>
+                </div>
+                <p class="byline">Créé par <strong>Iheb HAFDALLAH</strong></p>
+
+                <div class="hero-code">
+                    <pre data-label="Exemple">
+-- Les 3 meilleurs clients
+SELECT TOP 3 cl.Nom, COUNT(*) AS NbCommandes, SUM(cm.Total) AS CA
+FROM   Clients   AS cl
+JOIN   Commandes AS cm ON cm.ClientID = cl.ClientID
+GROUP BY cl.Nom
+ORDER BY CA DESC;
+</pre>
+                </div>
+
+                <div class="stats">
+                    <div class="stat"><b>14</b><span>chapitres</span></div>
+                    <div class="stat"><b id="nbEx">100+</b><span>exemples</span></div>
+                    <div class="stat"><b>1</b><span>jeu de données commun</span></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= SOMMAIRE ================= -->
+        <section class="toc">
+            <div class="container">
+                <h2>Sommaire</h2>
+                <div class="row g-3">
+                    <div class="col-6 col-md-4 col-lg-3"><a class="toc-item" href="#demarrer"><span
+                                class="num">01</span><strong>Démarrer</strong><small>Syntaxe, ordre
+                                d'exécution</small></a></div>
+                    <div class="col-6 col-md-4 col-lg-3"><a class="toc-item" href="#bases"><span
+                                class="num">02</span><strong>Bases & schémas</strong><small>CREATE / USE / DROP
+                                DATABASE</small></a></div>
+                    <div class="col-6 col-md-4 col-lg-3"><a class="toc-item" href="#types"><span
+                                class="num">03</span><strong>Types de données</strong><small>INT, VARCHAR,
+                                DATE…</small></a></div>
+                    <div class="col-6 col-md-4 col-lg-3"><a class="toc-item" href="#tables"><span
+                                class="num">04</span><strong>Tables & contraintes</strong><small>CREATE / ALTER / DROP
+                                TABLE</small></a></div>
+                    <div class="col-6 col-md-4 col-lg-3"><a class="toc-item" href="#dml"><span
+                                class="num">05</span><strong>INSERT UPDATE DELETE</strong><small>Modifier les
+                                données</small></a></div>
+                    <div class="col-6 col-md-4 col-lg-3"><a class="toc-item" href="#select"><span
+                                class="num">06</span><strong>SELECT</strong><small>WHERE, ORDER BY, CASE</small></a>
+                    </div>
+                    <div class="col-6 col-md-4 col-lg-3"><a class="toc-item" href="#agregation"><span
+                                class="num">07</span><strong>Agrégation</strong><small>COUNT, SUM, GROUP BY</small></a>
+                    </div>
+                    <div class="col-6 col-md-4 col-lg-3"><a class="toc-item" href="#jointures"><span
+                                class="num">08</span><strong>Jointures</strong><small>INNER, LEFT, FULL…</small></a>
+                    </div>
+                    <div class="col-6 col-md-4 col-lg-3"><a class="toc-item" href="#sousrequetes"><span
+                                class="num">09</span><strong>Sous-requêtes & CTE</strong><small>EXISTS, WITH,
+                                UNION</small></a></div>
+                    <div class="col-6 col-md-4 col-lg-3"><a class="toc-item" href="#fonctions"><span
+                                class="num">10</span><strong>Fonctions</strong><small>Texte, dates, nombres,
+                                fenêtres</small></a></div>
+                    <div class="col-6 col-md-4 col-lg-3"><a class="toc-item" href="#objets"><span
+                                class="num">11</span><strong>Vues, index, procédures</strong><small>Objets
+                                programmables</small></a></div>
+                    <div class="col-6 col-md-4 col-lg-3"><a class="toc-item" href="#programmation"><span
+                                class="num">12</span><strong>Programmation T-SQL</strong><small>Variables, IF,
+                                TRY/CATCH</small></a></div>
+                    <div class="col-6 col-md-4 col-lg-3"><a class="toc-item" href="#admin"><span
+                                class="num">13</span><strong>Administration</strong><small>Sécurité, backup,
+                                système</small></a></div>
+                    <div class="col-6 col-md-4 col-lg-3"><a class="toc-item" href="#pratiques"><span
+                                class="num">14</span><strong>Bonnes pratiques</strong><small>Erreurs de
+                                débutant</small></a></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= JEU DE DONNEES ================= -->
+        <section class="sec sec-dark" id="jeu-de-donnees" data-group="g-bases">
+            <div class="container">
+                <div class="sec-head">
+                    <span class="tag dark">Avant de commencer</span>
+                    <h2>Un jeu de données pour tout le cheat sheet</h2>
+                    <p>Tous les exemples utilisent la même petite base <code>Boutique</code>. Copie le script,
+                        exécute-le dans SSMS, puis teste chaque requête.</p>
+                </div>
+                <div class="row g-4">
+                    <div class="col-12">
+                        <article class="cs-card">
+                            <h3>Les 5 tables et leurs relations</h3>
+                            <div class="row g-3">
+                                <div class="col-6 col-lg">
+                                    <div class="tbl">
+                                        <h4>Clients</h4>
+                                        <ul>
+                                            <li>ClientID <span class="k2">PK</span></li>
+                                            <li>Nom</li>
+                                            <li>Prenom</li>
+                                            <li>Email</li>
+                                            <li>Ville</li>
+                                            <li>DateInscription</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div class="col-6 col-lg">
+                                    <div class="tbl">
+                                        <h4>Commandes</h4>
+                                        <ul>
+                                            <li>CommandeID <span class="k2">PK</span></li>
+                                            <li>ClientID <span class="k2">FK</span></li>
+                                            <li>DateCommande</li>
+                                            <li>Statut</li>
+                                            <li>Total</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div class="col-6 col-lg">
+                                    <div class="tbl">
+                                        <h4>LignesCommande</h4>
+                                        <ul>
+                                            <li>LigneID <span class="k2">PK</span></li>
+                                            <li>CommandeID <span class="k2">FK</span></li>
+                                            <li>ProduitID <span class="k2">FK</span></li>
+                                            <li>Quantite</li>
+                                            <li>PrixUnitaire</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div class="col-6 col-lg">
+                                    <div class="tbl">
+                                        <h4>Produits</h4>
+                                        <ul>
+                                            <li>ProduitID <span class="k2">PK</span></li>
+                                            <li>Nom</li>
+                                            <li>Prix</li>
+                                            <li>Stock</li>
+                                            <li>CategorieID <span class="k2">FK</span></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div class="col-6 col-lg">
+                                    <div class="tbl">
+                                        <h4>Categories</h4>
+                                        <ul>
+                                            <li>CategorieID <span class="k2">PK</span></li>
+                                            <li>Nom</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="relation">Clients 1 ──&lt; N Commandes 1 ──&lt; N LignesCommande N &gt;── 1
+                                Produits N &gt;── 1 Categories</div>
+                            <p><code>PK</code> = clé primaire (identifie la ligne) · <code>FK</code> = clé étrangère
+                                (pointe vers une autre table) · <code>1 ──&lt; N</code> = « un client a plusieurs
+                                commandes ».</p>
+                        </article>
+                    </div>
+                    <div class="col-12 col-xl-7">
+                        <article class="cs-card">
+                            <h3>Script de création + données <span class="chip">À exécuter</span></h3>
+                            <pre>
+CREATE DATABASE Boutique;
+GO
+USE Boutique;
+GO
+
+CREATE TABLE Categories (
+    CategorieID INT IDENTITY(1,1) PRIMARY KEY,
+    Nom         NVARCHAR(50) NOT NULL
+);
+CREATE TABLE Produits (
+    ProduitID   INT IDENTITY(1,1) PRIMARY KEY,
+    Nom         NVARCHAR(100) NOT NULL,
+    Prix        DECIMAL(10,2) NOT NULL,
+    Stock       INT NOT NULL DEFAULT 0,
+    CategorieID INT NULL REFERENCES Categories(CategorieID)
+);
+CREATE TABLE Clients (
+    ClientID        INT IDENTITY(1,1) PRIMARY KEY,
+    Nom             NVARCHAR(50) NOT NULL,
+    Prenom          NVARCHAR(50) NOT NULL,
+    Email           NVARCHAR(120) NULL,
+    Ville           NVARCHAR(50) NULL,
+    DateInscription DATE NOT NULL DEFAULT GETDATE()
+);
+CREATE TABLE Commandes (
+    CommandeID   INT IDENTITY(1,1) PRIMARY KEY,
+    ClientID     INT NOT NULL REFERENCES Clients(ClientID),
+    DateCommande DATETIME2 NOT NULL DEFAULT SYSDATETIME(),
+    Statut       VARCHAR(20) NOT NULL DEFAULT 'En attente',
+    Total        DECIMAL(10,2) NULL
+);
+CREATE TABLE LignesCommande (
+    LigneID      INT IDENTITY(1,1) PRIMARY KEY,
+    CommandeID   INT NOT NULL REFERENCES Commandes(CommandeID),
+    ProduitID    INT NOT NULL REFERENCES Produits(ProduitID),
+    Quantite     INT NOT NULL CHECK (Quantite &gt; 0),
+    PrixUnitaire DECIMAL(10,2) NOT NULL
+);
+GO
+
+INSERT INTO Categories (Nom) VALUES (N'Informatique'), (N'Livres'), (N'Maison');
+INSERT INTO Produits (Nom, Prix, Stock, CategorieID) VALUES
+    (N'Clavier mécanique',   79.90,  25, 1),
+    (N'Souris sans fil',     29.50,  60, 1),
+    (N'Roman SQL pour tous', 19.00, 100, 2),
+    (N'Lampe de bureau',     35.00,   0, 3);
+INSERT INTO Clients (Nom, Prenom, Email, Ville) VALUES
+    (N'Benali',  N'Sara',  'sara@mail.dz',  N'Alger'),
+    (N'Haddad',  N'Karim', 'karim@mail.dz', N'Oran'),
+    (N'Merabet', N'Lina',  NULL,            N'Alger');
+INSERT INTO Commandes (ClientID, Statut, Total) VALUES
+    (1, 'Livree',     109.40),
+    (1, 'En attente',  19.00),
+    (2, 'Livree',      35.00);
+INSERT INTO LignesCommande (CommandeID, ProduitID, Quantite, PrixUnitaire) VALUES
+    (1, 1, 1, 79.90), (1, 2, 1, 29.50), (2, 3, 1, 19.00), (3, 4, 1, 35.00);
+</pre>
+                        </article>
+                    </div>
+                    <div class="col-12 col-xl-5">
+                        <article class="cs-card">
+                            <h3>Contenu des tables</h3>
+                            <div class="table-responsive">
+                                <table class="table sqlserver-table">
+                                    <thead>
+                                        <tr>
+                                            <th>ClientID</th>
+                                            <th>Nom</th>
+                                            <th>Prenom</th>
+                                            <th>Email</th>
+                                            <th>Ville</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>1</td>
+                                            <td>Benali</td>
+                                            <td>Sara</td>
+                                            <td>sara@mail.dz</td>
+                                            <td>Alger</td>
+                                        </tr>
+                                        <tr>
+                                            <td>2</td>
+                                            <td>Haddad</td>
+                                            <td>Karim</td>
+                                            <td>karim@mail.dz</td>
+                                            <td>Oran</td>
+                                        </tr>
+                                        <tr>
+                                            <td>3</td>
+                                            <td>Merabet</td>
+                                            <td>Lina</td>
+                                            <td>NULL</td>
+                                            <td>Alger</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table sqlserver-table">
+                                    <thead>
+                                        <tr>
+                                            <th>ProduitID</th>
+                                            <th>Nom</th>
+                                            <th>Prix</th>
+                                            <th>Stock</th>
+                                            <th>Cat.</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>1</td>
+                                            <td>Clavier mécanique</td>
+                                            <td>79.90</td>
+                                            <td>25</td>
+                                            <td>1</td>
+                                        </tr>
+                                        <tr>
+                                            <td>2</td>
+                                            <td>Souris sans fil</td>
+                                            <td>29.50</td>
+                                            <td>60</td>
+                                            <td>1</td>
+                                        </tr>
+                                        <tr>
+                                            <td>3</td>
+                                            <td>Roman SQL pour tous</td>
+                                            <td>19.00</td>
+                                            <td>100</td>
+                                            <td>2</td>
+                                        </tr>
+                                        <tr>
+                                            <td>4</td>
+                                            <td>Lampe de bureau</td>
+                                            <td>35.00</td>
+                                            <td>0</td>
+                                            <td>3</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table sqlserver-table">
+                                    <thead>
+                                        <tr>
+                                            <th>CommandeID</th>
+                                            <th>ClientID</th>
+                                            <th>Statut</th>
+                                            <th>Total</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>1</td>
+                                            <td>1</td>
+                                            <td>Livree</td>
+                                            <td>109.40</td>
+                                        </tr>
+                                        <tr>
+                                            <td>2</td>
+                                            <td>1</td>
+                                            <td>En attente</td>
+                                            <td>19.00</td>
+                                        </tr>
+                                        <tr>
+                                            <td>3</td>
+                                            <td>2</td>
+                                            <td>Livree</td>
+                                            <td>35.00</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <p>Lina n'a aucune commande et n'a pas d'email : parfait pour comprendre
+                                <code>LEFT JOIN</code> et <code>NULL</code>.
+                            </p>
+                        </article>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= 01 DEMARRER ================= -->
+        <section class="sec" id="demarrer" data-group="g-bases">
+            <div class="container">
+                <div class="sec-head">
+                    <span class="tag">01</span>
+                    <h2>Démarrer avec SQL Server</h2>
+                    <p><strong>SQL</strong> est le langage des bases de données ; <strong>T-SQL</strong> (Transact-SQL)
+                        est la version de Microsoft, avec variables, conditions, boucles et gestion d'erreurs. Tu
+                        l'écris dans <strong>SSMS</strong> (SQL Server Management Studio) ou Azure Data Studio.</p>
+                </div>
+                <div class="row g-4">
+                    <div class="col-12 col-lg-6">
+                        <article class="cs-card">
+                            <h3>Ton premier script</h3>
+                            <p>Les mots-clés ne sont pas sensibles à la casse. Le <code>;</code> final est facultatif
+                                mais recommandé.</p>
+                            <pre>
+-- Commentaire sur une ligne
+/* Commentaire
+   sur plusieurs lignes */
+SELECT 'Bonjour SQL Server' AS Message;   -- affiche un texte
+SELECT 1 + 1 AS Resultat;                 -- calcule : 2
+GO   -- sépare les lots (batch) : commande de SSMS, pas du T-SQL
+</pre>
+                        </article>
+                    </div>
+                    <div class="col-12 col-lg-6">
+                        <article class="cs-card">
+                            <h3>Infos utiles sur le serveur</h3>
+                            <pre>
+SELECT @@VERSION;       -- version de SQL Server
+SELECT @@SERVERNAME;    -- nom de l'instance
+SELECT DB_NAME();       -- base de données courante
+SELECT SUSER_SNAME();   -- login connecté
+SELECT GETDATE();       -- date et heure actuelles
+SELECT NEWID();         -- identifiant unique (GUID)
+</pre>
+                        </article>
+                    </div>
+                    <div class="col-12 col-lg-6">
+                        <article class="cs-card">
+                            <h3>Ordre d'exécution d'une requête</h3>
+                            <p>SQL ne s'exécute pas dans l'ordre où tu l'écris. C'est la clé pour comprendre pourquoi un
+                                alias du <code>SELECT</code> n'est pas utilisable dans le <code>WHERE</code>.</p>
+                            <ol class="steps">
+                                <li>FROM / JOIN</li>
+                                <li>WHERE</li>
+                                <li>GROUP BY</li>
+                                <li>HAVING</li>
+                                <li>SELECT</li>
+                                <li>DISTINCT</li>
+                                <li>ORDER BY</li>
+                                <li>TOP / OFFSET</li>
+                            </ol>
+                            <pre>
+SELECT   Ville, COUNT(*) AS Nb      -- 5
+FROM     Clients                    -- 1
+WHERE    Email IS NOT NULL          -- 2
+GROUP BY Ville                      -- 3
+HAVING   COUNT(*) &gt; 0               -- 4
+ORDER BY Nb DESC;                   -- 7 (ici l'alias Nb est autorisé)
+</pre>
+                        </article>
+                    </div>
+                    <div class="col-12 col-lg-6">
+                        <article class="cs-card">
+                            <h3>Les familles de commandes</h3>
+                            <div class="table-responsive">
+                                <table class="table sqlserver-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Famille</th>
+                                            <th>Rôle</th>
+                                            <th>Commandes</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>DDL</td>
+                                            <td>Définir la structure</td>
+                                            <td><code>CREATE</code> <code>ALTER</code> <code>DROP</code>
+                                                <code>TRUNCATE</code>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>DML</td>
+                                            <td>Modifier les données</td>
+                                            <td><code>INSERT</code> <code>UPDATE</code> <code>DELETE</code>
+                                                <code>MERGE</code>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>DQL</td>
+                                            <td>Lire les données</td>
+                                            <td><code>SELECT</code></td>
+                                        </tr>
+                                        <tr>
+                                            <td>DCL</td>
+                                            <td>Gérer les droits</td>
+                                            <td><code>GRANT</code> <code>DENY</code> <code>REVOKE</code></td>
+                                        </tr>
+                                        <tr>
+                                            <td>TCL</td>
+                                            <td>Gérer les transactions</td>
+                                            <td><code>BEGIN TRAN</code> <code>COMMIT</code> <code>ROLLBACK</code></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </article>
+                    </div>
+                    <div class="col-12 col-lg-6">
+                        <article class="cs-card">
+                            <h3>Règles de syntaxe & nommage</h3>
+                            <ul>
+                                <li>Chaînes de texte entre <strong>apostrophes</strong> : <code>'Alger'</code>. Pour une
+                                    apostrophe dans le texte, on la double : <code>'L''été'</code>.</li>
+                                <li>Préfixe <code>N</code> pour l'Unicode (arabe, accents, emojis) :
+                                    <code>N'Café'</code>.
+                                </li>
+                                <li>Noms avec espaces ou mots réservés entre crochets : <code>[Date commande]</code>,
+                                    <code>[Order]</code>.
+                                </li>
+                                <li>Schéma par défaut : <code>dbo</code>. Nom complet :
+                                    <code>Boutique.dbo.Clients</code>.
+                                </li>
+                                <li>Convention conseillée : <code>PascalCase</code> pour les tables et colonnes,
+                                    préfixes <code>PK_</code> <code>FK_</code> <code>IX_</code> <code>vw_</code>
+                                    <code>usp_</code>.
+                                </li>
+                            </ul>
+                            <div class="note"><span class="lbl">Astuce</span><span>Sélectionne seulement une partie du
+                                    script avant <kbd>F5</kbd> pour n'exécuter que cette partie.</span></div>
+                        </article>
+                    </div>
+                    <div class="col-12 col-lg-6">
+                        <article class="cs-card">
+                            <h3>Raccourcis SSMS <span class="chip">Gain de temps</span></h3>
+                            <div class="table-responsive">
+                                <table class="table sqlserver-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Raccourci</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>F5 ou Ctrl+E</td>
+                                            <td>Exécuter (la sélection, sinon tout)</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Ctrl+L</td>
+                                            <td>Plan d'exécution estimé</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Ctrl+M</td>
+                                            <td>Inclure le plan d'exécution réel</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Ctrl+K, Ctrl+C</td>
+                                            <td>Commenter la sélection</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Ctrl+K, Ctrl+U</td>
+                                            <td>Décommenter</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Ctrl+Shift+U / L</td>
+                                            <td>Majuscules / minuscules</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Alt+F1</td>
+                                            <td>Structure de la table sélectionnée</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Ctrl+R</td>
+                                            <td>Masquer / afficher les résultats</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <pre class="plain" data-label="Terminal">
+sqlcmd -S localhost -E                       # authentification Windows
+sqlcmd -S localhost -U sa -P "MotDePasse"    # authentification SQL
+sqlcmd -S localhost -d Boutique -Q "SELECT COUNT(*) FROM Clients"
+</pre>
+                        </article>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= 02 BASES ================= -->
+        <section class="sec sec-linen" id="bases" data-group="g-bases">
+            <div class="container">
+                <div class="sec-head">
+                    <span class="tag dark">02</span>
+                    <h2>Bases de données & schémas</h2>
+                    <p>Une instance SQL Server contient plusieurs bases. Chaque base contient des schémas (des «
+                        dossiers »), et chaque schéma contient des tables, vues, procédures…</p>
+                </div>
+                <div class="row g-4">
+                    <div class="col-12 col-lg-6">
+                        <article class="cs-card">
+                            <h3>Créer et utiliser <span class="chip">DDL</span></h3>
+                            <pre>
+CREATE DATABASE Boutique;
+GO
+USE Boutique;        -- choisit la base de travail
+GO
+</pre>
+                            <div class="note warn"><span class="lbl">Attention</span><span><code>CREATE DATABASE</code>
+                                    doit être exécuté seul dans son lot : mets un <code>GO</code> après.</span></div>
+                        </article>
+                    </div>
+                    <div class="col-12 col-lg-6">
+                        <article class="cs-card">
+                            <h3>Lister les bases</h3>
+                            <pre>
+SELECT name, create_date, collation_name FROM sys.databases;
+EXEC sp_databases;
+SELECT DB_NAME();                          -- base courante
+SELECT name FROM sys.databases WHERE database_id &gt; 4;   -- sans les bases système
+</pre>
+                        </article>
+                    </div>
+                    <div class="col-12 col-lg-6">
+                        <article class="cs-card">
+                            <h3>Modifier une base</h3>
+                            <pre>
+ALTER DATABASE Boutique MODIFY NAME = BoutiqueV2;       -- renommer
+ALTER DATABASE BoutiqueV2 SET RECOVERY SIMPLE;          -- mode de récupération
+ALTER DATABASE BoutiqueV2 SET SINGLE_USER WITH ROLLBACK IMMEDIATE;  -- accès exclusif
+ALTER DATABASE BoutiqueV2 SET MULTI_USER;               -- retour à la normale
+</pre>
+                        </article>
+                    </div>
+                    <div class="col-12 col-lg-6">
+                        <article class="cs-card">
+                            <h3>Supprimer une base</h3>
+                            <pre>
+USE master;   -- impossible de supprimer la base dans laquelle on se trouve
+DROP DATABASE IF EXISTS Boutique;
+</pre>
+                            <div class="note warn"><span class="lbl">Attention</span><span>Irréversible sans sauvegarde.
+                                    Fais un <code>BACKUP</code> avant (voir chapitre 13).</span></div>
+                        </article>
+                    </div>
+                    <div class="col-12 col-lg-6">
+                        <article class="cs-card">
+                            <h3>Schémas</h3>
+                            <pre>
+CREATE SCHEMA Ventes;
+GO
+CREATE TABLE Ventes.Factures (FactureID INT PRIMARY KEY);
+SELECT * FROM Ventes.Factures;
+ALTER SCHEMA dbo TRANSFER Ventes.Factures;   -- déplace la table vers dbo
+DROP SCHEMA Ventes;                          -- le schéma doit être vide
+</pre>
+                        </article>
+                    </div>
+                    <div class="col-12 col-lg-6">
+                        <article class="cs-card">
+                            <h3>Collation (tri, casse, accents)</h3>
+                            <p><code>CI</code> = insensible à la casse · <code>CS</code> = sensible · <code>AI</code> /
+                                <code>AS</code> = insensible / sensible aux accents.
+                            </p>
+                            <pre>
+CREATE DATABASE Boutique COLLATE French_CI_AS;
+SELECT SERVERPROPERTY('Collation');             -- collation du serveur
+SELECT * FROM Clients
+WHERE  Nom = 'benali' COLLATE French_CS_AS;     -- force la sensibilité à la casse
+</pre>
+                        </article>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= 03 TYPES ================= -->
+        <section class="sec" id="types" data-group="g-bases">
+            <div class="container">
+                <div class="sec-head">
+                    <span class="tag">03</span>
+                    <h2>Types de données</h2>
+                    <p>Chaque colonne a un type. Bien choisir le type économise de l'espace, accélère les requêtes et
+                        évite les erreurs.</p>
+                </div>
+                <div class="row g-4">
+                    <div class="col-12">
+                        <article class="cs-card">
+                            <h3>Les types à connaître</h3>
+                            <div class="table-responsive">
+                                <table class="table sqlserver-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Famille</th>
+                                            <th>Type</th>
+                                            <th>Plage / taille</th>
+                                            <th>Quand l'utiliser</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>Entiers</td>
+                                            <td><code>TINYINT</code></td>
+                                            <td>0 à 255</td>
+                                            <td>Petit code, âge</td>
+                                        </tr>
+                                        <tr>
+                                            <td></td>
+                                            <td><code>SMALLINT</code></td>
+                                            <td>−32 768 à 32 767</td>
+                                            <td>Quantités modestes</td>
+                                        </tr>
+                                        <tr>
+                                            <td></td>
+                                            <td><code>INT</code></td>
+                                            <td>± 2,1 milliards</td>
+                                            <td>Identifiants (le plus courant)</td>
+                                        </tr>
+                                        <tr>
+                                            <td></td>
+                                            <td><code>BIGINT</code></td>
+                                            <td>± 9,2 × 10¹⁸</td>
+                                            <td>Très grandes tables, compteurs</td>
+                                        </tr>
+                                        <tr>
+                                            <td></td>
+                                            <td><code>BIT</code></td>
+                                            <td>0, 1 ou NULL</td>
+                                            <td>Booléen (actif / inactif)</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Décimaux</td>
+                                            <td><code>DECIMAL(p,s)</code></td>
+                                            <td>Exact : p chiffres dont s après la virgule</td>
+                                            <td>Prix, montants : <code>DECIMAL(10,2)</code></td>
+                                        </tr>
+                                        <tr>
+                                            <td></td>
+                                            <td><code>MONEY</code></td>
+                                            <td>4 décimales</td>
+                                            <td>Possible, mais préfère <code>DECIMAL</code></td>
+                                        </tr>
+                                        <tr>
+                                            <td></td>
+                                            <td><code>FLOAT</code> / <code>REAL</code></td>
+                                            <td>Approximatif</td>
+                                            <td>Sciences, mesures. <strong>Jamais pour de l'argent</strong></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Texte</td>
+                                            <td><code>CHAR(n)</code></td>
+                                            <td>Longueur fixe, jusqu'à 8000</td>
+                                            <td>Codes de taille constante (<code>'DZ'</code>)</td>
+                                        </tr>
+                                        <tr>
+                                            <td></td>
+                                            <td><code>VARCHAR(n)</code></td>
+                                            <td>Variable, jusqu'à 8000</td>
+                                            <td>Texte ASCII : emails, codes</td>
+                                        </tr>
+                                        <tr>
+                                            <td></td>
+                                            <td><code>NVARCHAR(n)</code></td>
+                                            <td>Unicode, jusqu'à 4000</td>
+                                            <td>Noms, arabe, accents, emojis</td>
+                                        </tr>
+                                        <tr>
+                                            <td></td>
+                                            <td><code>VARCHAR(MAX)</code> / <code>NVARCHAR(MAX)</code></td>
+                                            <td>Jusqu'à 2 Go</td>
+                                            <td>Longs textes, JSON</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Dates</td>
+                                            <td><code>DATE</code></td>
+                                            <td>0001-01-01 à 9999-12-31</td>
+                                            <td>Date de naissance, d'inscription</td>
+                                        </tr>
+                                        <tr>
+                                            <td></td>
+                                            <td><code>TIME</code></td>
+                                            <td>hh:mm:ss.nnnnnnn</td>
+                                            <td>Heure seule</td>
+                                        </tr>
+                                        <tr>
+                                            <td></td>
+                                            <td><code>DATETIME2(n)</code></td>
+                                            <td>Précision jusqu'à 100 ns</td>
+                                            <td>Horodatage <strong>(recommandé)</strong></td>
+                                        </tr>
+                                        <tr>
+                                            <td></td>
+                                            <td><code>DATETIME</code></td>
+                                            <td>Précision ~3 ms</td>
+                                            <td>Ancien type, à éviter pour du neuf</td>
+                                        </tr>
+                                        <tr>
+                                            <td></td>
+                                            <td><code>DATETIMEOFFSET</code></td>
+                                            <td>Date + heure + fuseau</td>
+                                            <td>Applications internationales</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Autres</td>
+                                            <td><code>UNIQUEIDENTIFIER</code></td>
+                                            <td>GUID de 16 octets</td>
+                                            <td>Identifiant global unique</td>
+                                        </tr>
+                                        <tr>
+                                            <td></td>
+                                            <td><code>VARBINARY(MAX)</code></td>
+                                            <td>Binaire</td>
+                                            <td>Fichiers, images</td>
+                                        </tr>
+                                        <tr>
+                                            <td></td>
+                                            <td><code>XML</code></td>
+                                            <td>Document XML</td>
+                                            <td>Données XML typées</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </article>
+                    </div>
+                    <div class="col-12 col-lg-6">
+                        <article class="cs-card">
+                            <h3>Déclarer des variables de chaque type</h3>
+                            <pre>
+DECLARE @age         TINYINT          = 25;
+DECLARE @prix        DECIMAL(10,2)    = 1999.99;
+DECLARE @actif       BIT              = 1;
+DECLARE @nom         NVARCHAR(50)     = N'Sara Benali';
+DECLARE @code        VARCHAR(10)      = 'DZ-16';
+DECLARE @naissance   DATE             = '2000-05-17';
+DECLARE @maintenant  DATETIME2(0)     = SYSDATETIME();
+DECLARE @id          UNIQUEIDENTIFIER = NEWID();
+
+SELECT @age AS Age, @prix AS Prix, @nom AS Nom, @naissance AS Naissance;
+</pre>
+                        </article>
+                    </div>
+                    <div class="col-12 col-lg-6">
+                        <article class="cs-card">
+                            <h3>Unicode et formats de date</h3>
+                            <p>Sans <code>N</code>, les caractères hors de ta collation peuvent devenir des
+                                <code>?</code>. Pour les dates, le format <code>YYYYMMDD</code> est le seul indépendant
+                                de la langue du serveur.
+                            </p>
+                            <pre>
+SELECT N'Équipe d''été' AS Texte;      -- Unicode + apostrophe doublée
+SELECT CAST('20261120' AS DATE);        -- YYYYMMDD : toujours sûr
+SELECT CAST('2026-11-20' AS DATE);      -- ISO : sûr avec DATE / DATETIME2
+SELECT CAST('20/11/2026' AS DATE);      -- ⚠ dépend de SET LANGUAGE / DATEFORMAT
+</pre>
+                            <div class="note"><span class="lbl">Astuce</span><span>Utilise <code>NVARCHAR</code> par
+                                    défaut pour les noms de personnes, <code>VARCHAR</code> pour les codes
+                                    techniques.</span></div>
+                        </article>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= 04 TABLES ================= -->
+        <section class="sec sec-linen" id="tables" data-group="g-tables">
+            <div class="container">
+                <div class="sec-head">
+                    <span class="tag dark">04</span>
+                    <h2>Tables & contraintes</h2>
+                    <p>Les contraintes protègent la qualité de tes données : la base refuse automatiquement ce qui n'a
+                        pas de sens.</p>
+                </div>
+                <div class="row g-4">
+                    <div class="col-12 col-lg-6">
+                        <article class="cs-card">
+                            <h3>Créer une table <span class="chip">DDL</span></h3>
+                            <pre>
+CREATE TABLE Clients (
+    ClientID        INT IDENTITY(1,1) PRIMARY KEY,
+    Nom             NVARCHAR(50)  NOT NULL,
+    Prenom          NVARCHAR(50)  NOT NULL,
+    Email           NVARCHAR(120) NULL,
+    Ville           NVARCHAR(50)  NULL,
+    DateInscription DATE          NOT NULL DEFAULT GETDATE()
+);
+</pre>
+                        </article>
+                    </div>
+                    <div class="col-12 col-lg-6">
+                        <article class="cs-card">
+                            <h3>Les 7 contraintes essentielles</h3>
+                            <div class="table-responsive">
+                                <table class="table sqlserver-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Contrainte</th>
+                                            <th>Rôle</th>
+                                            <th>Exemple</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>PRIMARY KEY</td>
+                                            <td>Identifie chaque ligne (unique, jamais NULL)</td>
+                                            <td><code>ClientID INT PRIMARY KEY</code></td>
+                                        </tr>
+                                        <tr>
+                                            <td>FOREIGN KEY</td>
+                                            <td>Relie à la clé d'une autre table</td>
+                                            <td><code>REFERENCES Clients(ClientID)</code></td>
+                                        </tr>
+                                        <tr>
+                                            <td>UNIQUE</td>
+                                            <td>Interdit les doublons</td>
+                                            <td><code>Email NVARCHAR(120) UNIQUE</code></td>
+                                        </tr>
+                                        <tr>
+                                            <td>CHECK</td>
+                                            <td>Impose une condition</td>
+                                            <td><code>CHECK (Prix &gt;= 0)</code></td>
+                                        </tr>
+                                        <tr>
+                                            <td>DEFAULT</td>
+                                            <td>Valeur si non renseignée</td>
+                                            <td><code>DEFAULT 0</code></td>
+                                        </tr>
+                                        <tr>
+                                            <td>NOT NULL</td>
+                                            <td>Valeur obligatoire</td>
+                                            <td><code>Nom NVARCHAR(50) NOT NULL</code></td>
+                                        </tr>
+                                        <tr>
+                                            <td>IDENTITY</td>
+                                            <td>Numéro auto-incrémenté</td>
+                                            <td><code>IDENTITY(1,1)</code> (départ, pas)</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </article>
+                    </div>
+                    <div class="col-12 col-lg-6">
+                        <article class="cs-card">
+                            <h3>Contraintes nommées <span class="chip">Recommandé</span></h3>
+                            <p>Donner un nom facilite les messages d'erreur et les <code>ALTER</code> ultérieurs.</p>
+                            <pre>
+CREATE TABLE Commandes (
+    CommandeID   INT IDENTITY(1,1),
+    ClientID     INT           NOT NULL,
+    DateCommande DATETIME2     NOT NULL CONSTRAINT DF_Cmd_Date   DEFAULT SYSDATETIME(),
+    Statut       VARCHAR(20)   NOT NULL CONSTRAINT DF_Cmd_Statut DEFAULT 'En attente',
+    Total        DECIMAL(10,2) NULL,
+    CONSTRAINT PK_Commandes   PRIMARY KEY (CommandeID),
+    CONSTRAINT FK_Cmd_Clients FOREIGN KEY (ClientID)
+        REFERENCES Clients (ClientID) ON DELETE CASCADE,
+    CONSTRAINT CK_Cmd_Total   CHECK (Total &gt;= 0)
+);
+</pre>
+                        </article>
+                    </div>
+                    <div class="col-12 col-lg-6">
+                        <article class="cs-card">
+                            <h3>Clés étrangères : que faire à la suppression ?</h3>
+                            <div class="table-responsive">
+                                <table class="table sqlserver-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Option</th>
+                                            <th>Effet quand la ligne parente change</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>NO ACTION</td>
+                                            <td>Refuse l'opération (par défaut)</td>
+                                        </tr>
+                                        <tr>
+                                            <td>CASCADE</td>
+                                            <td>Supprime / modifie aussi les lignes enfants</td>
+                                        </tr>
+                                        <tr>
+                                            <td>SET NULL</td>
+                                            <td>Met la clé enfant à NULL</td>
+                                        </tr>
+                                        <tr>
+                                            <td>SET DEFAULT</td>
+                                            <td>Met la clé enfant à sa valeur par défaut</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <pre>
+ALTER TABLE Commandes ADD CONSTRAINT FK_Cmd_Clients
+    FOREIGN KEY (ClientID) REFERENCES Clients (ClientID)
+    ON DELETE NO ACTION ON UPDATE CASCADE;
+</pre>
+                        </article>
+                    </div>
+                    <div class="col-12 col-lg-6">
+                        <article class="cs-card">
+                            <h3>Modifier une table <span class="chip">ALTER</span></h3>
+                            <pre>
+ALTER TABLE Clients ADD Telephone VARCHAR(20) NULL;           -- ajouter une colonne
+ALTER TABLE Clients ALTER COLUMN Telephone VARCHAR(30) NULL;  -- changer le type
+EXEC sp_rename 'Clients.Telephone', 'Mobile', 'COLUMN';       -- renommer la colonne
+ALTER TABLE Clients DROP COLUMN Mobile;                       -- supprimer la colonne
+
+ALTER TABLE Clients  ADD CONSTRAINT UQ_Clients_Email UNIQUE (Email);
+ALTER TABLE Produits ADD CONSTRAINT CK_Produits_Prix CHECK (Prix &gt;= 0);
+ALTER TABLE Clients  DROP CONSTRAINT UQ_Clients_Email;
+
+EXEC sp_rename 'AncienNom', 'NouveauNom';                     -- renommer une table
+</pre>
+                            <div class="note warn"><span class="lbl">Attention</span><span><code>UNIQUE</code> n'accepte
+                                    qu'<strong>un seul</strong> <code>NULL</code>. Pour plusieurs emails vides, utilise
+                                    un index unique filtré (chapitre 11).</span></div>
+                        </article>
+                    </div>
+                    <div class="col-12 col-lg-6">
+                        <article class="cs-card">
+                            <h3>Supprimer ou vider</h3>
+                            <pre>
+DROP TABLE IF EXISTS Archives;   -- supprime la table ET ses données
+TRUNCATE TABLE Logs;             -- vide très vite, remet IDENTITY à 1
+DELETE FROM Logs;                -- vide ligne par ligne, IDENTITY conservé
+</pre>
+                            <div class="note warn"><span class="lbl">Attention</span><span>Impossible de
+                                    <code>DROP</code> ou <code>TRUNCATE</code> une table référencée par une clé
+                                    étrangère : supprime d'abord la contrainte ou la table enfant.</span></div>
+                        </article>
+                    </div>
+                    <div class="col-12 col-lg-6">
+                        <article class="cs-card">
+                            <h3>IDENTITY : récupérer et contrôler l'ID</h3>
+                            <pre>
+INSERT INTO Clients (Nom, Prenom) VALUES (N'Test', N'User');
+SELECT SCOPE_IDENTITY();             -- dernier ID généré ici (à préférer)
+SELECT @@IDENTITY;                   -- dernier ID de la session (triggers inclus)
+SELECT IDENT_CURRENT('Clients');     -- dernier ID de la table, toutes sessions
+
+DBCC CHECKIDENT ('Clients', RESEED, 0);   -- le prochain ID sera 1
+SET IDENTITY_INSERT Clients ON;           -- autorise un ID manuel
+INSERT INTO Clients (ClientID, Nom, Prenom) VALUES (100, N'Manuel', N'ID');
+SET IDENTITY_INSERT Clients OFF;
+</pre>
+                        </article>
+                    </div>
+                    <div class="col-12 col-lg-6">
+                        <article class="cs-card">
+                            <h3>Copies et tables temporaires</h3>
+                            <pre>
+SELECT * INTO ClientsCopie FROM Clients;               -- structure + données
+SELECT * INTO ClientsVide  FROM Clients WHERE 1 = 0;   -- structure seulement
+
+CREATE TABLE #Temp (ID INT, Valeur NVARCHAR(50));      -- visible dans ta session
+CREATE TABLE ##TempGlobale (ID INT);                   -- visible par toutes les sessions
+DROP TABLE #Temp;                                      -- sinon supprimée à la déconnexion
+</pre>
+                        </article>
+                    </div>
+                    <div class="col-12 col-lg-6">
+                        <article class="cs-card">
+                            <h3>Colonnes calculées</h3>
+                            <pre>
+ALTER TABLE LignesCommande
+    ADD SousTotal AS (Quantite * PrixUnitaire);              -- calculée à chaque lecture
+ALTER TABLE LignesCommande
+    ADD SousTotalStocke AS (Quantite * PrixUnitaire) PERSISTED;  -- stockée sur disque
+</pre>
+                        </article>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= 05 DML ================= -->
+        <section class="sec" id="dml" data-group="g-tables">
+            <div class="container">
+                <div class="sec-head">
+                    <span class="tag">05</span>
+                    <h2>INSERT, UPDATE, DELETE</h2>
+                    <p>Les commandes qui <strong>modifient</strong> les données. Règle d'or : un <code>UPDATE</code> ou
+                        un <code>DELETE</code> sans <code>WHERE</code> touche <strong>toute</strong> la table.</p>
+                </div>
+                <div class="row g-4">
+                    <div class="col-12 col-lg-6">
+                        <article class="cs-card">
+                            <h3>INSERT : ajouter des lignes <span class="chip">DML</span></h3>
+                            <pre>
+INSERT INTO Clients (Nom, Prenom, Email, Ville)
+VALUES (N'Zidane', N'Amine', 'amine@mail.dz', N'Constantine');
+
+-- plusieurs lignes d'un coup (jusqu'à 1000)
+INSERT INTO Categories (Nom)
+VALUES (N'Sport'), (N'Jouets'), (N'Jardin');
+
+-- colonnes omises : DEFAULT, IDENTITY ou NULL s'appliquent
+INSERT INTO Clients (Nom, Prenom) VALUES (N'Said', N'Nour');
+</pre>
+                        </article>
+                    </div>
+                    <div class="col-12 col-lg-6">
+                        <article class="cs-card">
+                            <h3>INSERT … SELECT et OUTPUT</h3>
+                            <pre>
+-- copier des lignes d'une table vers une autre
+INSERT INTO ClientsArchive (Nom, Prenom, Email)
+SELECT Nom, Prenom, Email
+FROM   Clients
+WHERE  DateInscription &lt; '2020-01-01';
+
+-- récupérer les lignes insérées (ID généré inclus)
+INSERT INTO Produits (Nom, Prix, Stock, CategorieID)
+OUTPUT inserted.ProduitID, inserted.Nom
+VALUES (N'Casque audio', 59.00, 15, 1);
+</pre>
+                        </article>
+                    </div>
+                    <div class="col-12 col-lg-6">
+                        <article class="cs-card">
+                            <h3>UPDATE : modifier des lignes</h3>
+                            <pre>
+UPDATE Produits SET Prix = 84.90 WHERE ProduitID = 1;
+
+UPDATE Produits SET Prix = Prix * 1.10 WHERE CategorieID = 1;   -- +10 %
+
+UPDATE Clients
+SET    Ville = N'Blida', Email = 'new@mail.dz'
+WHERE  ClientID = 3;
+
+-- voir l'ancienne et la nouvelle valeur
+UPDATE Produits SET Stock = Stock + 10
+OUTPUT deleted.Stock AS Avant, inserted.Stock AS Apres
+WHERE ProduitID = 2;
+</pre>
+                        </article>
+                    </div>
+                    <div class="col-12 col-lg-6">
+                        <article class="cs-card">
+                            <h3>UPDATE avec jointure</h3>
+                            <pre>
+-- décrémenter le stock selon les lignes de la commande 1
+UPDATE p
+SET    p.Stock = p.Stock - l.Quantite
+FROM   Produits AS p
+JOIN   LignesCommande AS l ON l.ProduitID = p.ProduitID
+WHERE  l.CommandeID = 1;
+
+-- recalculer le total d'une commande
+UPDATE cm
+SET    cm.Total = (SELECT SUM(Quantite * PrixUnitaire)
+                   FROM LignesCommande WHERE CommandeID = cm.CommandeID)
+FROM   Commandes AS cm
+WHERE  cm.CommandeID = 1;
+</pre>
+                        </article>
+                    </div>
+                    <div class="col-12 col-lg-6">
+                        <article class="cs-card">
+                            <h3>DELETE : supprimer des lignes</h3>
+                            <pre>
+DELETE FROM Commandes WHERE CommandeID = 2;
+DELETE FROM Clients   WHERE Ville IS NULL;
+
+-- supprimer par lots pour ne pas bloquer la table
+DELETE TOP (100) FROM Logs WHERE DateLog &lt; '2025-01-01';
+
+-- supprimer les clients sans commande
+DELETE cl
+FROM   Clients AS cl
+LEFT JOIN Commandes AS cm ON cm.ClientID = cl.ClientID
+WHERE  cm.CommandeID IS NULL;
+</pre>
+                        </article>
+                    </div>
+                    <div class="col-12 col-lg-6">
+                        <article class="cs-card">
+                            <h3>Le filet de sécurité : BEGIN TRAN / ROLLBACK</h3>
+                            <p>Teste tes modifications dangereuses dans une transaction, vérifie, puis annule ou valide.
+                            </p>
+                            <pre>
+BEGIN TRAN;
+    DELETE FROM Clients;             -- oups…
+    SELECT COUNT(*) FROM Clients;    -- 0 : on voit l'étendue des dégâts
+ROLLBACK;                            -- tout est annulé ! (COMMIT pour valider)
+SELECT COUNT(*) FROM Clients;        -- les clients sont de retour
+</pre>
+                        </article>
+                    </div>
+                    <div class="col-12 col-lg-6">
+                        <article class="cs-card">
+                            <h3>DELETE vs TRUNCATE vs DROP</h3>
+                            <div class="table-responsive">
+                                <table class="table sqlserver-table">
+                                    <thead>
+                                        <tr>
+                                            <th></th>
+                                            <th>DELETE</th>
+                                            <th>TRUNCATE</th>
+                                            <th>DROP</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>Supprime</td>
+                                            <td>Des lignes</td>
+                                            <td>Toutes les lignes</td>
+                                            <td>La table entière</td>
+                                        </tr>
+                                        <tr>
+                                            <td>WHERE</td>
+                                            <td>Oui</td>
+                                            <td>Non</td>
+                                            <td>Non</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Vitesse</td>
+                                            <td>Lent</td>
+                                            <td>Très rapide</td>
+                                            <td>Très rapide</td>
+                                        </tr>
+                                        <tr>
+                                            <td>IDENTITY</td>
+                                            <td>Conservé</td>
+                                            <td>Remis à zéro</td>
+                                            <td>Disparaît</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Triggers</td>
+                                            <td>Déclenchés</td>
+                                            <td>Non</td>
+                                            <td>Non</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Famille</td>
+                                            <td>DML</td>
+                                            <td>DDL</td>
+                                            <td>DDL</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </article>
+                    </div>
+                    <div class="col-12">
+                        <article class="cs-card">
+                            <h3>MERGE : insérer ou mettre à jour en une fois (upsert)</h3>
+                            <pre>
+MERGE Produits AS cible
+USING (VALUES (1, 79.90), (9, 12.00)) AS source (ProduitID, Prix)
+   ON cible.ProduitID = source.ProduitID
+WHEN MATCHED THEN
+     UPDATE SET cible.Prix = source.Prix                       -- existe : on met à jour
+WHEN NOT MATCHED BY TARGET THEN
+     INSERT (Nom, Prix) VALUES (N'Nouveau produit', source.Prix);  -- n'existe pas : on insère
+</pre>
+                            <div class="note"><span class="lbl">Astuce</span><span>Un <code>MERGE</code> doit toujours
+                                    se terminer par un point-virgule.</span></div>
+                        </article>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= 06 SELECT ================= -->
+        <section class="sec sec-linen" id="select" data-group="g-requetes">
+            <div class="container">
+                <div class="sec-head">
+                    <span class="tag dark">06</span>
+                    <h2>SELECT : lire les données</h2>
+                    <p>La commande la plus utilisée. Elle ne modifie rien : tu peux l'essayer sans risque.</p>
+                </div>
+                <div class="row g-4">
+                    <div class="col-12 col-lg-6">
+                        <article class="cs-card">
+                            <h3>Les bases <span class="chip">DQL</span></h3>
+                            <pre>
+SELECT * FROM Clients;                                 -- toutes les colonnes
+SELECT Nom, Prenom, Ville FROM Clients;                -- colonnes choisies
+SELECT Nom AS NomFamille, Prenom AS [Prénom] FROM Clients;   -- alias
+SELECT Nom, Prix * 1.19 AS PrixTTC FROM Produits;      -- calcul
+SELECT Prenom + ' ' + Nom AS NomComplet FROM Clients;  -- concaténation
+SELECT CONCAT(Prenom, ' ', Nom) AS NomComplet FROM Clients;  -- gère les NULL
+SELECT 'Livraison offerte' AS Info, 5 AS Valeur;       -- sans FROM
+</pre>
+                        </article>
+                    </div>
+                    <div class="col-12 col-lg-6">
+                        <article class="cs-card">
+                            <h3>DISTINCT et TOP</h3>
+                            <pre>
+SELECT DISTINCT Ville FROM Clients;                     -- valeurs uniques
+SELECT TOP 3 * FROM Produits ORDER BY Prix DESC;        -- les 3 plus chers
+SELECT TOP 10 PERCENT * FROM Produits ORDER BY Prix;    -- 10 % des lignes
+SELECT TOP 3 WITH TIES Nom, Prix
+FROM Produits ORDER BY Prix DESC;                       -- garde les ex æquo
+</pre>
+                        </article>
+                    </div>
+                    <div class="col-12 col-lg-6">
+                        <article class="cs-card">
+                            <h3>WHERE : filtrer les lignes</h3>
+                            <pre>
+SELECT * FROM Produits WHERE Prix &gt; 30;
+SELECT * FROM Produits WHERE Prix BETWEEN 20 AND 50;           -- bornes incluses
+SELECT * FROM Clients  WHERE Ville IN (N'Alger', N'Oran');
+SELECT * FROM Clients  WHERE Ville = N'Alger' AND Email IS NOT NULL;
+SELECT * FROM Produits WHERE Stock = 0 OR Prix &gt; 100;
+SELECT * FROM Clients  WHERE NOT Ville = N'Alger';
+SELECT * FROM Clients  WHERE Ville &lt;&gt; N'Alger';                   -- ou !=
+</pre>
+                            <div class="note"><span class="lbl">Astuce</span><span>Priorité : <code>NOT</code> puis
+                                    <code>AND</code> puis <code>OR</code>. Mets des parenthèses :
+                                    <code>WHERE (A OR B) AND C</code>.</span></div>
+                        </article>
+                    </div>
+                    <div class="col-12 col-lg-6">
+                        <article class="cs-card">
+                            <h3>Les opérateurs</h3>
+                            <div class="table-responsive">
+                                <table class="table sqlserver-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Opérateur</th>
+                                            <th>Sens</th>
+                                            <th>Exemple</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><code>=</code> <code>&lt;&gt;</code> <code>!=</code></td>
+                                            <td>Égal / différent</td>
+                                            <td><code>Ville = N'Oran'</code></td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>&gt;</code> <code>&lt;</code> <code>&gt;=</code>
+                                                <code>&lt;=</code>
+                                            </td>
+                                            <td>Comparaisons</td>
+                                            <td><code>Prix &gt;= 30</code></td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>BETWEEN</code></td>
+                                            <td>Entre deux bornes incluses</td>
+                                            <td><code>Prix BETWEEN 20 AND 50</code></td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>IN</code></td>
+                                            <td>Dans une liste</td>
+                                            <td><code>Ville IN ('A','B')</code></td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>LIKE</code></td>
+                                            <td>Motif de texte</td>
+                                            <td><code>Nom LIKE 'B%'</code></td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>IS NULL</code></td>
+                                            <td>Valeur absente</td>
+                                            <td><code>Email IS NULL</code></td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>AND</code> <code>OR</code> <code>NOT</code></td>
+                                            <td>Logique</td>
+                                            <td><code>A AND NOT B</code></td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>+</code> <code>-</code> <code>*</code> <code>/</code>
+                                                <code>%</code>
+                                            </td>
+                                            <td>Calcul (% = modulo)</td>
+                                            <td><code>Prix * Stock</code></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </article>
+                    </div>
+                    <div class="col-12 col-lg-6">
+                        <article class="cs-card">
+                            <h3>LIKE : chercher un motif</h3>
+                            <p><code>%</code> = n'importe quelle suite · <code>_</code> = un seul caractère ·
+                                <code>[ ]</code> = un caractère parmi · <code>[^ ]</code> = sauf.
+                            </p>
+                            <pre>
+SELECT * FROM Clients WHERE Nom LIKE 'B%';      -- commence par B
+SELECT * FROM Clients WHERE Nom LIKE '%li';     -- finit par li
+SELECT * FROM Clients WHERE Nom LIKE '%er%';    -- contient er
+SELECT * FROM Clients WHERE Nom LIKE '_enali';  -- 1 caractère + enali
+SELECT * FROM Clients WHERE Nom LIKE '[BH]%';   -- commence par B ou H
+SELECT * FROM Clients WHERE Nom LIKE '[A-C]%';  -- commence par A, B ou C
+SELECT * FROM Clients WHERE Nom LIKE '[^BH]%';  -- ne commence pas par B ni H
+SELECT * FROM Produits WHERE Nom LIKE '%10!%%' ESCAPE '!';  -- cherche un % littéral
+</pre>
+                        </article>
+                    </div>
+                    <div class="col-12 col-lg-6">
+                        <article class="cs-card">
+                            <h3>NULL : l'absence de valeur</h3>
+                            <p><code>NULL</code> n'est ni 0 ni vide : c'est « inconnu ». On ne le compare jamais avec
+                                <code>=</code>.
+                            </p>
+                            <pre>
+SELECT * FROM Clients WHERE Email IS NULL;       -- ✔ correct
+SELECT * FROM Clients WHERE Email = NULL;        -- ✘ ne renvoie jamais rien
+SELECT ISNULL(Email, 'non renseigné') FROM Clients;      -- remplace NULL
+SELECT COALESCE(Email, Ville, 'inconnu') FROM Clients;   -- 1er non NULL de la liste
+SELECT 100 / NULLIF(Stock, 0) FROM Produits;     -- NULL au lieu d'une division par 0
+</pre>
+                        </article>
+                    </div>
+                    <div class="col-12 col-lg-6">
+                        <article class="cs-card">
+                            <h3>ORDER BY et pagination</h3>
+                            <pre>
+SELECT * FROM Produits ORDER BY Prix;                  -- croissant (ASC par défaut)
+SELECT * FROM Produits ORDER BY Prix DESC, Nom ASC;    -- plusieurs critères
+SELECT Nom, Prix FROM Produits ORDER BY 2 DESC;        -- par position (à éviter)
+
+-- Pagination : page 2, 10 lignes par page
+SELECT ProduitID, Nom, Prix
+FROM   Produits
+ORDER BY ProduitID
+OFFSET 10 ROWS FETCH NEXT 10 ROWS ONLY;
+</pre>
+                        </article>
+                    </div>
+                    <div class="col-12">
+                        <article class="cs-card">
+                            <h3>CASE, IIF, CHOOSE : des conditions dans la requête</h3>
+                            <pre>
+SELECT Nom, Stock,
+       CASE
+           WHEN Stock = 0  THEN 'Rupture'
+           WHEN Stock &lt; 20 THEN 'Stock faible'
+           ELSE 'Disponible'
+       END AS Etat
+FROM Produits;
+
+SELECT Nom, IIF(Stock &gt; 0, 'Oui', 'Non') AS EnStock FROM Produits;   -- si / sinon
+SELECT CHOOSE(2, 'Lundi', 'Mardi', 'Mercredi');                      -- Mardi
+
+-- CASE dans un ORDER BY ou un SUM : compter sous condition
+SELECT SUM(CASE WHEN Statut = 'Livree' THEN 1 ELSE 0 END) AS NbLivrees FROM Commandes;
+</pre>
+                        </article>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= 07 AGREGATION ================= -->
+        <section class="sec" id="agregation" data-group="g-requetes">
+            <div class="container">
+                <div class="sec-head">
+                    <span class="tag">07</span>
+                    <h2>Agrégation : COUNT, SUM, GROUP BY</h2>
+                    <p>Résumer beaucoup de lignes en quelques chiffres : totaux, moyennes, nombres, par groupe.</p>
+                </div>
+                <div class="row g-4">
+                    <div class="col-12 col-lg-6">
+                        <article class="cs-card">
+                            <h3>Les fonctions d'agrégation</h3>
+                            <div class="table-responsive">
+                                <table class="table sqlserver-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Fonction</th>
+                                            <th>Résultat</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><code>COUNT(*)</code></td>
+                                            <td>Nombre de lignes</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>COUNT(col)</code></td>
+                                            <td>Nombre de valeurs <strong>non NULL</strong></td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>COUNT(DISTINCT col)</code></td>
+                                            <td>Nombre de valeurs différentes</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>SUM(col)</code></td>
+                                            <td>Somme</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>AVG(col)</code></td>
+                                            <td>Moyenne (ignore les NULL)</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>MIN(col)</code> <code>MAX(col)</code></td>
+                                            <td>Plus petite / plus grande valeur</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>STRING_AGG(col, sep)</code></td>
+                                            <td>Concatène les valeurs en un texte</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </article>
+                    </div>
+                    <div class="col-12 col-lg-6">
+                        <article class="cs-card">
+                            <h3>Sur toute la table</h3>
+                            <pre>
+SELECT COUNT(*)   AS NbProduits,
+       SUM(Stock) AS StockTotal,
+       AVG(Prix)  AS PrixMoyen,
+       MIN(Prix)  AS PrixMin,
+       MAX(Prix)  AS PrixMax
+FROM Produits;
+
+SELECT COUNT(*)               AS NbClients,
+       COUNT(Email)           AS AvecEmail,    -- ignore les NULL
+       COUNT(DISTINCT Ville)  AS NbVilles
+FROM Clients;
+</pre>
+                        </article>
+                    </div>
+                    <div class="col-12 col-lg-6">
+                        <article class="cs-card">
+                            <h3>GROUP BY : un résultat par groupe</h3>
+                            <pre>
+SELECT Ville, COUNT(*) AS NbClients
+FROM   Clients
+GROUP BY Ville;
+
+SELECT CategorieID, AVG(Prix) AS PrixMoyen, SUM(Stock) AS Stock
+FROM   Produits
+GROUP BY CategorieID
+ORDER BY PrixMoyen DESC;
+</pre>
+                        </article>
+                    </div>
+                    <div class="col-12 col-lg-6">
+                        <article class="cs-card">
+                            <h3>La règle d'or du GROUP BY</h3>
+                            <p>Chaque colonne du <code>SELECT</code> doit être soit dans le <code>GROUP BY</code>, soit
+                                dans une fonction d'agrégation.</p>
+                            <pre>
+-- ✘ Erreur : Nom n'est ni groupé ni agrégé
+SELECT Ville, Nom, COUNT(*) FROM Clients GROUP BY Ville;
+
+-- ✔ Correct
+SELECT Ville, COUNT(*) AS Nb FROM Clients GROUP BY Ville;
+SELECT Ville, MIN(Nom) AS PremierNom, COUNT(*) AS Nb FROM Clients GROUP BY Ville;
+</pre>
+                        </article>
+                    </div>
+                    <div class="col-12 col-lg-6">
+                        <article class="cs-card">
+                            <h3>HAVING : filtrer les groupes</h3>
+                            <p><code>WHERE</code> filtre les <strong>lignes</strong> avant le regroupement,
+                                <code>HAVING</code> filtre les <strong>groupes</strong> après.
+                            </p>
+                            <pre>
+SELECT ClientID, COUNT(*) AS NbCommandes, SUM(Total) AS CA
+FROM   Commandes
+WHERE  Statut = 'Livree'          -- 1) on garde les lignes livrées
+GROUP BY ClientID                 -- 2) on regroupe
+HAVING COUNT(*) &gt;= 1              -- 3) on filtre les groupes
+   AND SUM(Total) &gt; 30;
+</pre>
+                        </article>
+                    </div>
+                    <div class="col-12 col-lg-6">
+                        <article class="cs-card">
+                            <h3>ROLLUP et STRING_AGG</h3>
+                            <pre>
+-- sous-totaux + total général
+SELECT ClientID, Statut, SUM(Total) AS CA
+FROM   Commandes
+GROUP BY ROLLUP (ClientID, Statut);
+
+-- liste des prénoms par ville dans une seule cellule
+SELECT Ville,
+       STRING_AGG(Prenom, ', ') WITHIN GROUP (ORDER BY Prenom) AS Clients
+FROM   Clients
+GROUP BY Ville;
+</pre>
+                        </article>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= 08 JOINTURES ================= -->
+        <section class="sec sec-linen" id="jointures" data-group="g-requetes">
+            <div class="container">
+                <div class="sec-head">
+                    <span class="tag dark">08</span>
+                    <h2>Jointures : relier plusieurs tables</h2>
+                    <p>Une jointure combine les lignes de deux tables grâce à une colonne commune (souvent clé primaire
+                        ↔ clé étrangère). Sur chaque schéma, la zone foncée est ce que la requête retourne.</p>
+                </div>
+                <div class="row g-4">
+                    <div class="col-12 col-lg-6">
+                        <article class="cs-card">
+                            <div class="card-top">
+                                <h3>INNER JOIN <span class="chip">Le plus courant</span></h3>
+                                <div class="venn" data-v="inner" role="img" aria-label="Intersection de A et B"></div>
+                            </div>
+                            <p>Seulement les lignes qui ont une correspondance des <strong>deux</strong> côtés.</p>
+                            <pre>
+SELECT cl.Nom, cm.CommandeID, cm.Total
+FROM   Clients AS cl
+INNER JOIN Commandes AS cm ON cm.ClientID = cl.ClientID;
+-- Lina (aucune commande) n'apparaît pas
+</pre>
+                        </article>
+                    </div>
+                    <div class="col-12 col-lg-6">
+                        <article class="cs-card">
+                            <div class="card-top">
+                                <h3>LEFT JOIN</h3>
+                                <div class="venn" data-v="left" role="img" aria-label="Tout A"></div>
+                            </div>
+                            <p>Toutes les lignes de la table de <strong>gauche</strong>, avec <code>NULL</code> quand il
+                                n'y a pas de correspondance.</p>
+                            <pre>
+SELECT cl.Nom, cm.CommandeID
+FROM   Clients AS cl
+LEFT JOIN Commandes AS cm ON cm.ClientID = cl.ClientID;
+-- Lina apparaît avec CommandeID = NULL
+</pre>
+                        </article>
+                    </div>
+                    <div class="col-12 col-lg-6">
+                        <article class="cs-card">
+                            <div class="card-top">
+                                <h3>RIGHT JOIN</h3>
+                                <div class="venn" data-v="right" role="img" aria-label="Tout B"></div>
+                            </div>
+                            <p>Toutes les lignes de la table de <strong>droite</strong>. C'est un <code>LEFT JOIN</code>
+                                avec les tables inversées : on l'utilise rarement.</p>
+                            <pre>
+SELECT cm.CommandeID, cl.Nom
+FROM   Clients AS cl
+RIGHT JOIN Commandes AS cm ON cm.ClientID = cl.ClientID;
+</pre>
+                        </article>
+                    </div>
+                    <div class="col-12 col-lg-6">
+                        <article class="cs-card">
+                            <div class="card-top">
+                                <h3>FULL OUTER JOIN</h3>
+                                <div class="venn" data-v="full" role="img" aria-label="Tout A et tout B"></div>
+                            </div>
+                            <p>Toutes les lignes des deux tables, correspondantes ou non.</p>
+                            <pre>
+SELECT cl.Nom, cm.CommandeID
+FROM   Clients AS cl
+FULL OUTER JOIN Commandes AS cm ON cm.ClientID = cl.ClientID;
+</pre>
+                        </article>
+                    </div>
+                    <div class="col-12 col-lg-6">
+                        <article class="cs-card">
+                            <div class="card-top">
+                                <h3>Anti-jointure <span class="chip">Sans correspondance</span></h3>
+                                <div class="venn" data-v="anti" role="img" aria-label="A sans B"></div>
+                            </div>
+                            <p>Les lignes de A qui n'ont <strong>aucune</strong> ligne en B : un <code>LEFT JOIN</code>
+                                suivi de <code>IS NULL</code>.</p>
+                            <pre>
+SELECT cl.Nom
+FROM   Clients AS cl
+LEFT JOIN Commandes AS cm ON cm.ClientID = cl.ClientID
+WHERE  cm.CommandeID IS NULL;      -- clients qui n'ont jamais commandé
+</pre>
+                        </article>
+                    </div>
+                    <div class="col-12 col-lg-6">
+                        <article class="cs-card">
+                            <h3>CROSS JOIN et auto-jointure</h3>
+                            <p><code>CROSS JOIN</code> = toutes les combinaisons possibles. L'auto-jointure relie une
+                                table à elle-même avec deux alias.</p>
+                            <pre>
+-- 3 tailles × 2 couleurs = 6 combinaisons
+SELECT t.Taille, c.Couleur
+FROM   (VALUES ('S'), ('M'), ('L')) AS t (Taille)
+CROSS JOIN (VALUES ('Noir'), ('Blanc')) AS c (Couleur);
+
+-- table imaginaire Employes (EmployeID, Nom, ManagerID)
+SELECT e.Nom AS Employe, m.Nom AS Manager
+FROM   Employes AS e
+LEFT JOIN Employes AS m ON m.EmployeID = e.ManagerID;
+</pre>
+                        </article>
+                    </div>
+                    <div class="col-12">
+                        <article class="cs-card">
+                            <h3>Joindre plusieurs tables</h3>
+                            <p>On enchaîne les jointures, une par relation. Ici : client → commande → ligne → produit →
+                                catégorie.</p>
+                            <pre>
+SELECT cl.Nom                          AS Client,
+       cm.CommandeID,
+       p.Nom                           AS Produit,
+       l.Quantite,
+       l.Quantite * l.PrixUnitaire     AS SousTotal,
+       ca.Nom                          AS Categorie
+FROM   Clients        AS cl
+JOIN   Commandes      AS cm ON cm.ClientID    = cl.ClientID
+JOIN   LignesCommande AS l  ON l.CommandeID   = cm.CommandeID
+JOIN   Produits       AS p  ON p.ProduitID    = l.ProduitID
+LEFT JOIN Categories  AS ca ON ca.CategorieID = p.CategorieID
+ORDER BY cm.CommandeID;
+</pre>
+                            <div class="note warn"><span class="lbl">Attention</span><span>Avec un
+                                    <code>LEFT JOIN</code>, une condition sur la table de droite placée dans le
+                                    <code>WHERE</code> transforme la jointure en <code>INNER JOIN</code>. Mets-la dans
+                                    le <code>ON</code> :
+                                    <code>LEFT JOIN Commandes cm ON cm.ClientID = cl.ClientID AND cm.Statut = 'Livree'</code>.</span>
+                            </div>
+                        </article>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= 09 SOUS-REQUETES ================= -->
+        <section class="sec" id="sousrequetes" data-group="g-requetes">
+            <div class="container">
+                <div class="sec-head">
+                    <span class="tag">09</span>
+                    <h2>Sous-requêtes, CTE et ensembles</h2>
+                    <p>Imbriquer des requêtes pour résoudre des questions en plusieurs étapes, ou combiner les résultats
+                        de plusieurs <code>SELECT</code>.</p>
+                </div>
+                <div class="row g-4">
+                    <div class="col-12 col-lg-6">
+                        <article class="cs-card">
+                            <h3>Sous-requête dans le WHERE</h3>
+                            <pre>
+-- produits plus chers que la moyenne
+SELECT Nom, Prix
+FROM   Produits
+WHERE  Prix &gt; (SELECT AVG(Prix) FROM Produits);
+
+-- clients ayant une commande de plus de 50
+SELECT Nom FROM Clients
+WHERE  ClientID IN (SELECT ClientID FROM Commandes WHERE Total &gt; 50);
+</pre>
+                        </article>
+                    </div>
+                    <div class="col-12 col-lg-6">
+                        <article class="cs-card">
+                            <h3>EXISTS / NOT EXISTS</h3>
+                            <p>Teste simplement « existe-t-il au moins une ligne ? ». Rapide et sans piège avec les
+                                <code>NULL</code>.
+                            </p>
+                            <pre>
+-- clients qui ont commandé
+SELECT cl.Nom FROM Clients AS cl
+WHERE EXISTS (SELECT 1 FROM Commandes AS cm WHERE cm.ClientID = cl.ClientID);
+
+-- clients qui n'ont jamais commandé
+SELECT cl.Nom FROM Clients AS cl
+WHERE NOT EXISTS (SELECT 1 FROM Commandes AS cm WHERE cm.ClientID = cl.ClientID);
+</pre>
+                        </article>
+                    </div>
+                    <div class="col-12 col-lg-6">
+                        <article class="cs-card">
+                            <h3>Sous-requête dans le SELECT ou le FROM</h3>
+                            <pre>
+-- une valeur calculée par ligne
+SELECT cl.Nom,
+       (SELECT COUNT(*) FROM Commandes AS cm
+        WHERE cm.ClientID = cl.ClientID) AS NbCommandes
+FROM Clients AS cl;
+
+-- table dérivée (un alias est obligatoire)
+SELECT t.Ville, t.NbClients
+FROM  (SELECT Ville, COUNT(*) AS NbClients
+       FROM Clients GROUP BY Ville) AS t
+WHERE  t.NbClients &gt; 1;
+</pre>
+                        </article>
+                    </div>
+                    <div class="col-12 col-lg-6">
+                        <article class="cs-card">
+                            <h3>CTE : WITH <span class="chip">Plus lisible</span></h3>
+                            <p>Une CTE donne un nom à une sous-requête, pour la réutiliser et lire la requête de haut en
+                                bas.</p>
+                            <pre>
+WITH CA_Client AS (
+    SELECT ClientID, SUM(Total) AS CA
+    FROM   Commandes
+    GROUP BY ClientID
+)
+SELECT cl.Nom, ca.CA
+FROM   Clients AS cl
+JOIN   CA_Client AS ca ON ca.ClientID = cl.ClientID
+ORDER BY ca.CA DESC;
+</pre>
+                        </article>
+                    </div>
+                    <div class="col-12 col-lg-6">
+                        <article class="cs-card">
+                            <h3>CTE récursive</h3>
+                            <pre>
+-- génère les nombres de 1 à 10
+WITH Nombres AS (
+    SELECT 1 AS n                              -- point de départ (ancre)
+    UNION ALL
+    SELECT n + 1 FROM Nombres WHERE n &lt; 10     -- partie récursive
+)
+SELECT n FROM Nombres
+OPTION (MAXRECURSION 100);                     -- garde-fou (0 = illimité)
+</pre>
+                        </article>
+                    </div>
+                    <div class="col-12 col-lg-6">
+                        <article class="cs-card">
+                            <h3>UNION, INTERSECT, EXCEPT</h3>
+                            <p>Les <code>SELECT</code> combinés doivent avoir le même nombre de colonnes, avec des types
+                                compatibles.</p>
+                            <pre>
+SELECT Ville FROM Clients
+UNION                         -- fusionne et supprime les doublons
+SELECT N'Tizi Ouzou';
+
+SELECT Nom FROM Clients
+UNION ALL                     -- garde les doublons (plus rapide)
+SELECT Nom FROM Produits;
+
+SELECT Ville FROM Clients INTERSECT SELECT N'Alger';          -- en commun
+SELECT ClientID FROM Clients EXCEPT SELECT ClientID FROM Commandes;  -- dans A, pas dans B
+</pre>
+                        </article>
+                    </div>
+                    <div class="col-12">
+                        <article class="cs-card">
+                            <h3>CROSS APPLY : le « top N par groupe »</h3>
+                            <pre>
+-- la dernière commande de chaque client
+SELECT cl.Nom, d.CommandeID, d.DateCommande
+FROM   Clients AS cl
+CROSS APPLY (
+    SELECT TOP 1 CommandeID, DateCommande
+    FROM   Commandes AS cm
+    WHERE  cm.ClientID = cl.ClientID
+    ORDER BY DateCommande DESC
+) AS d;                        -- OUTER APPLY garde aussi les clients sans commande
+</pre>
+                        </article>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= 10 FONCTIONS ================= -->
+        <section class="sec sec-linen" id="fonctions" data-group="g-fonctions">
+            <div class="container">
+                <div class="sec-head">
+                    <span class="tag dark">10</span>
+                    <h2>Fonctions intégrées</h2>
+                    <p>Texte, dates, nombres, conversions, classements… SQL Server en propose des centaines. Voici
+                        celles que tu utiliseras tout le temps.</p>
+                </div>
+                <div class="row g-4">
+                    <div class="col-12 col-lg-6">
+                        <article class="cs-card">
+                            <h3>Fonctions de texte</h3>
+                            <pre>
+SELECT LEN('SQL Server');                  -- 10
+SELECT UPPER('sql'), LOWER('SQL');         -- SQL, sql
+SELECT LEFT('Bonjour', 3), RIGHT('Bonjour', 4);   -- Bon, jour
+SELECT SUBSTRING('Bonjour', 2, 3);         -- onj (début 2, longueur 3)
+SELECT CHARINDEX('jour', 'Bonjour');       -- 4 (0 si absent)
+SELECT REPLACE('a-b-c', '-', '/');         -- a/b/c
+SELECT TRIM('  texte  ');                  -- sans espaces (LTRIM / RTRIM aussi)
+SELECT CONCAT('SQL', ' ', 'Server');       -- SQL Server
+SELECT CONCAT_WS(' - ', 'A', 'B', 'C');    -- A - B - C
+SELECT REVERSE('abc'), REPLICATE('*', 5);  -- cba, *****
+SELECT STUFF('abcdef', 2, 3, 'XYZ');       -- aXYZef
+SELECT FORMAT(1234.5, 'N2', 'fr-FR');      -- 1 234,50
+SELECT value FROM STRING_SPLIT('a,b,c', ',');   -- une ligne par élément
+
+-- première lettre en majuscule
+SELECT UPPER(LEFT(Nom, 1)) + LOWER(SUBSTRING(Nom, 2, 50)) FROM Clients;
+</pre>
+                        </article>
+                    </div>
+                    <div class="col-12 col-lg-6">
+                        <article class="cs-card">
+                            <h3>Fonctions de date</h3>
+                            <pre>
+SELECT GETDATE(), SYSDATETIME(), GETUTCDATE();     -- maintenant
+SELECT YEAR(GETDATE()), MONTH(GETDATE()), DAY(GETDATE());
+SELECT DATEPART(WEEKDAY, GETDATE());               -- numéro du jour de la semaine
+SELECT DATENAME(MONTH, GETDATE());                 -- nom du mois
+SELECT DATEADD(DAY, 7, GETDATE());                 -- dans 7 jours
+SELECT DATEADD(MONTH, -1, '2026-03-31');           -- 2026-02-28
+SELECT DATEDIFF(DAY, '2026-01-01', '2026-11-20');  -- 323
+SELECT DATEDIFF(YEAR, '2000-05-17', GETDATE());    -- âge approximatif
+SELECT EOMONTH(GETDATE());                         -- dernier jour du mois
+SELECT DATEFROMPARTS(2026, 12, 25);                -- construit une date
+SELECT CAST(GETDATE() AS DATE);                    -- date sans l'heure
+SELECT FORMAT(GETDATE(), 'dd/MM/yyyy HH:mm');      -- mise en forme
+SELECT ISDATE('2026-02-30');                       -- 0 : date invalide
+
+-- tout novembre, sans fonction sur la colonne (utilise les index)
+SELECT * FROM Commandes
+WHERE  DateCommande &gt;= '2026-11-01' AND DateCommande &lt; '2026-12-01';
+</pre>
+                            <div class="table-responsive">
+                                <table class="table sqlserver-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Partie</th>
+                                            <th>Abréviations</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>Année / trimestre / mois</td>
+                                            <td><code>YEAR</code> <code>QUARTER</code> <code>MONTH</code> (yy, qq, mm)
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>Semaine / jour / jour de l'année</td>
+                                            <td><code>WEEK</code> <code>DAY</code> <code>DAYOFYEAR</code> (wk, dd, dy)
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>Heure / minute / seconde</td>
+                                            <td><code>HOUR</code> <code>MINUTE</code> <code>SECOND</code> (hh, mi, ss)
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </article>
+                    </div>
+                    <div class="col-12 col-lg-6">
+                        <article class="cs-card">
+                            <h3>Fonctions numériques</h3>
+                            <pre>
+SELECT ROUND(123.456, 2);          -- 123.460
+SELECT ROUND(123.456, 0);          -- 123.000
+SELECT CEILING(4.1), FLOOR(4.9);   -- 5, 4
+SELECT ABS(-15);                   -- 15
+SELECT POWER(2, 10), SQRT(144);    -- 1024, 12
+SELECT 17 % 5;                     -- 2 (reste de la division)
+SELECT 7 / 2, 7 / 2.0;             -- 3 (division entière !), 3.5
+SELECT RAND();                     -- nombre aléatoire entre 0 et 1
+SELECT ABS(CHECKSUM(NEWID())) % 100;   -- entier aléatoire de 0 à 99
+</pre>
+                        </article>
+                    </div>
+                    <div class="col-12 col-lg-6">
+                        <article class="cs-card">
+                            <h3>Conversion de types</h3>
+                            <pre>
+SELECT CAST('123' AS INT);                    -- texte → entier
+SELECT CAST(19.99 AS INT);                    -- 19 (tronqué)
+SELECT CONVERT(VARCHAR(10), GETDATE(), 103);  -- 20/11/2026 (style 103 = dd/mm/yyyy)
+SELECT CONVERT(VARCHAR(10), GETDATE(), 120);  -- 2026-11-20 (style 120 = ISO)
+SELECT TRY_CAST('abc' AS INT);                -- NULL au lieu d'une erreur
+SELECT TRY_CONVERT(DATE, '31/02/2026', 103);  -- NULL (date impossible)
+SELECT 'Total : ' + CAST(150 AS VARCHAR(10)); -- nombre → texte pour concaténer
+</pre>
+                            <div class="note"><span class="lbl">Astuce</span><span>Préfère <code>TRY_CAST</code> /
+                                    <code>TRY_CONVERT</code> quand les données viennent d'un import : pas d'erreur
+                                    bloquante.</span></div>
+                        </article>
+                    </div>
+                    <div class="col-12 col-lg-6">
+                        <article class="cs-card">
+                            <h3>Fonctions de fenêtrage : classements</h3>
+                            <p><code>OVER (…)</code> calcule sur un groupe de lignes <strong>sans les
+                                    regrouper</strong>.</p>
+                            <pre>
+SELECT Nom, Prix,
+       ROW_NUMBER() OVER (ORDER BY Prix DESC) AS Position,   -- 1,2,3,4
+       RANK()       OVER (ORDER BY Prix DESC) AS Rang,       -- 1,2,2,4 (ex æquo)
+       DENSE_RANK() OVER (ORDER BY Prix DESC) AS RangDense,  -- 1,2,2,3
+       NTILE(2)     OVER (ORDER BY Prix DESC) AS Moitie      -- 2 paquets
+FROM Produits;
+
+SELECT CategorieID, Nom, Prix,
+       AVG(Prix) OVER (PARTITION BY CategorieID) AS MoyenneCategorie,
+       ROW_NUMBER() OVER (PARTITION BY CategorieID ORDER BY Prix DESC) AS RangCategorie
+FROM Produits;
+</pre>
+                        </article>
+                    </div>
+                    <div class="col-12 col-lg-6">
+                        <article class="cs-card">
+                            <h3>Cumul, ligne précédente / suivante</h3>
+                            <pre>
+SELECT CommandeID, DateCommande, Total,
+       SUM(Total) OVER (ORDER BY DateCommande
+                        ROWS UNBOUNDED PRECEDING) AS CumulCA,
+       LAG(Total)  OVER (ORDER BY DateCommande)   AS TotalPrecedent,
+       LEAD(Total) OVER (ORDER BY DateCommande)   AS TotalSuivant
+FROM Commandes;
+
+-- le produit le plus cher de chaque catégorie
+WITH T AS (
+    SELECT *, ROW_NUMBER() OVER (PARTITION BY CategorieID ORDER BY Prix DESC) AS rn
+    FROM Produits
+)
+SELECT * FROM T WHERE rn = 1;
+</pre>
+                        </article>
+                    </div>
+                    <div class="col-12">
+                        <article class="cs-card">
+                            <h3>JSON <span class="chip">SQL Server 2016+</span></h3>
+                            <pre>
+SELECT ClientID, Nom, Ville FROM Clients FOR JSON PATH;   -- résultat au format JSON
+
+DECLARE @j NVARCHAR(MAX) = N'{"nom":"Sara","ville":"Alger","tags":["a","b"]}';
+SELECT ISJSON(@j);                      -- 1 si le JSON est valide
+SELECT JSON_VALUE(@j, '$.nom');         -- Sara
+SELECT JSON_QUERY(@j, '$.tags');        -- ["a","b"]
+SELECT * FROM OPENJSON(@j);             -- une ligne par clé
+</pre>
+                        </article>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= 11 OBJETS ================= -->
+        <section class="sec" id="objets" data-group="g-avance">
+            <div class="container">
+                <div class="sec-head">
+                    <span class="tag">11</span>
+                    <h2>Vues, index, procédures, fonctions, triggers</h2>
+                    <p>Des objets stockés dans la base pour réutiliser, accélérer et automatiser.</p>
+                </div>
+                <div class="row g-4">
+                    <div class="col-12 col-lg-6">
+                        <article class="cs-card">
+                            <h3>Vues : une requête enregistrée</h3>
+                            <p>Une vue se lit comme une table, mais ne stocke pas de données : elle exécute sa requête.
+                            </p>
+                            <pre>
+CREATE OR ALTER VIEW vw_CommandesDetail AS
+SELECT cm.CommandeID, cl.Nom AS Client, cm.DateCommande, cm.Total
+FROM   Commandes AS cm
+JOIN   Clients   AS cl ON cl.ClientID = cm.ClientID;
+GO
+SELECT * FROM vw_CommandesDetail WHERE Total &gt; 50;
+DROP VIEW IF EXISTS vw_CommandesDetail;
+</pre>
+                            <div class="note"><span class="lbl">Astuce</span><span><code>CREATE VIEW</code> doit être la
+                                    première instruction de son lot : mets <code>GO</code> avant et après.</span></div>
+                        </article>
+                    </div>
+                    <div class="col-12 col-lg-6">
+                        <article class="cs-card">
+                            <h3>Index : accélérer les recherches</h3>
+                            <p>Comme l'index d'un livre. Il accélère <code>SELECT</code>, <code>WHERE</code>,
+                                <code>JOIN</code> et <code>ORDER BY</code>, mais ralentit un peu <code>INSERT</code> /
+                                <code>UPDATE</code>.
+                            </p>
+                            <pre>
+CREATE INDEX IX_Clients_Ville ON Clients (Ville);                  -- simple
+CREATE UNIQUE INDEX UX_Clients_Email ON Clients (Email)
+       WHERE Email IS NOT NULL;                                    -- unique et filtré
+CREATE INDEX IX_Cmd_Client_Date ON Commandes (ClientID, DateCommande DESC);  -- composite
+CREATE INDEX IX_Produits_Cat ON Produits (CategorieID)
+       INCLUDE (Nom, Prix);                                        -- « couvrant »
+DROP INDEX IX_Clients_Ville ON Clients;
+EXEC sp_helpindex 'Clients';                                       -- lister les index
+</pre>
+                        </article>
+                    </div>
+                    <div class="col-12 col-lg-6">
+                        <article class="cs-card">
+                            <h3>Procédure stockée</h3>
+                            <p>Un script T-SQL nommé, avec paramètres, réutilisable et sécurisable.</p>
+                            <pre>
+CREATE OR ALTER PROCEDURE usp_CommandesClient
+    @ClientID INT,
+    @Statut   VARCHAR(20) = NULL          -- paramètre facultatif
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SELECT CommandeID, DateCommande, Statut, Total
+    FROM   Commandes
+    WHERE  ClientID = @ClientID
+      AND (@Statut IS NULL OR Statut = @Statut);
+END;
+GO
+EXEC usp_CommandesClient @ClientID = 1;
+EXEC usp_CommandesClient 1, 'Livree';
+</pre>
+                        </article>
+                    </div>
+                    <div class="col-12 col-lg-6">
+                        <article class="cs-card">
+                            <h3>Paramètre de sortie (OUTPUT)</h3>
+                            <pre>
+CREATE OR ALTER PROCEDURE usp_NbClients
+    @Ville NVARCHAR(50),
+    @Nb    INT OUTPUT
+AS
+    SELECT @Nb = COUNT(*) FROM Clients WHERE Ville = @Ville;
+GO
+DECLARE @n INT;
+EXEC usp_NbClients N'Alger', @n OUTPUT;
+SELECT @n AS NbClients;
+</pre>
+                        </article>
+                    </div>
+                    <div class="col-12 col-lg-6">
+                        <article class="cs-card">
+                            <h3>Fonctions utilisateur</h3>
+                            <pre>
+-- fonction scalaire : renvoie une valeur
+CREATE OR ALTER FUNCTION dbo.fn_TTC (@ht DECIMAL(10,2), @tva DECIMAL(4,2) = 19)
+RETURNS DECIMAL(10,2)
+AS
+BEGIN
+    RETURN @ht * (1 + @tva / 100);
+END;
+GO
+SELECT Nom, dbo.fn_TTC(Prix, DEFAULT) AS PrixTTC FROM Produits;
+GO
+-- fonction table (inline) : renvoie un jeu de lignes
+CREATE OR ALTER FUNCTION dbo.fn_CommandesClient (@ClientID INT)
+RETURNS TABLE
+AS
+RETURN (SELECT CommandeID, Total FROM Commandes WHERE ClientID = @ClientID);
+GO
+SELECT * FROM dbo.fn_CommandesClient(1);
+</pre>
+                        </article>
+                    </div>
+                    <div class="col-12 col-lg-6">
+                        <article class="cs-card">
+                            <h3>Trigger : réagir automatiquement</h3>
+                            <p>Dans un trigger, les tables spéciales <code>inserted</code> et <code>deleted</code>
+                                contiennent les lignes nouvelles et anciennes.</p>
+                            <pre>
+-- AuditCommandes est une table imaginaire de journalisation
+CREATE OR ALTER TRIGGER trg_Commandes_Audit
+ON Commandes
+AFTER INSERT, UPDATE
+AS
+BEGIN
+    SET NOCOUNT ON;
+    INSERT INTO AuditCommandes (CommandeID, Action, DateAction)
+    SELECT i.CommandeID,
+           IIF(EXISTS (SELECT 1 FROM deleted), 'UPDATE', 'INSERT'),
+           SYSDATETIME()
+    FROM   inserted AS i;
+END;
+</pre>
+                        </article>
+                    </div>
+                    <div class="col-12">
+                        <article class="cs-card">
+                            <h3>Séquence : un compteur indépendant des tables</h3>
+                            <pre>
+CREATE SEQUENCE seq_Facture START WITH 1000 INCREMENT BY 1;
+SELECT NEXT VALUE FOR seq_Facture;      -- 1000, puis 1001, 1002…
+DROP SEQUENCE seq_Facture;
+</pre>
+                        </article>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= 12 T-SQL ================= -->
+        <section class="sec sec-linen" id="programmation" data-group="g-avance">
+            <div class="container">
+                <div class="sec-head">
+                    <span class="tag dark">12</span>
+                    <h2>Programmation T-SQL</h2>
+                    <p>Variables, conditions, boucles, erreurs, transactions : de vrais scripts pour automatiser ton
+                        travail.</p>
+                </div>
+                <div class="row g-4">
+                    <div class="col-12 col-lg-6">
+                        <article class="cs-card">
+                            <h3>Variables</h3>
+                            <pre>
+DECLARE @nom NVARCHAR(50) = N'Benali', @n INT;
+SET @n = 5;
+SELECT @n = COUNT(*) FROM Clients WHERE Nom = @nom;   -- affecter depuis une requête
+SELECT @nom AS Nom, @n AS Nb;
+PRINT 'Nombre : ' + CAST(@n AS VARCHAR(10));         -- onglet Messages
+</pre>
+                            <div class="note warn"><span class="lbl">Attention</span><span>Une variable n'existe que
+                                    dans son lot : un <code>GO</code> la détruit.</span></div>
+                        </article>
+                    </div>
+                    <div class="col-12 col-lg-6">
+                        <article class="cs-card">
+                            <h3>IF / ELSE</h3>
+                            <pre>
+DECLARE @stock INT = (SELECT Stock FROM Produits WHERE ProduitID = 1);
+
+IF @stock = 0
+    PRINT 'Rupture';
+ELSE IF @stock &lt; 10
+    PRINT 'Stock faible';
+ELSE
+BEGIN                                  -- plusieurs instructions : BEGIN … END
+    PRINT 'Stock OK';
+    PRINT 'Rien à commander';
+END;
+
+IF EXISTS (SELECT 1 FROM Clients WHERE Email = 'sara@mail.dz')
+    PRINT 'Ce client existe déjà';
+</pre>
+                        </article>
+                    </div>
+                    <div class="col-12 col-lg-6">
+                        <article class="cs-card">
+                            <h3>WHILE : boucle</h3>
+                            <pre>
+DECLARE @i INT = 1;
+WHILE @i &lt;= 5
+BEGIN
+    PRINT 'Itération ' + CAST(@i AS VARCHAR(2));
+    SET @i += 1;
+    IF @i = 4 BREAK;       -- sort de la boucle (CONTINUE : itération suivante)
+END;
+</pre>
+                        </article>
+                    </div>
+                    <div class="col-12 col-lg-6">
+                        <article class="cs-card">
+                            <h3>TRY / CATCH : gérer les erreurs</h3>
+                            <pre>
+BEGIN TRY
+    INSERT INTO LignesCommande (CommandeID, ProduitID, Quantite, PrixUnitaire)
+    VALUES (1, 1, -5, 10);               -- viole le CHECK (Quantite &gt; 0)
+END TRY
+BEGIN CATCH
+    SELECT ERROR_NUMBER()   AS Numero,
+           ERROR_MESSAGE()  AS Message,
+           ERROR_SEVERITY() AS Gravite,
+           ERROR_LINE()     AS Ligne;
+    THROW;                               -- relance l'erreur d'origine
+END CATCH;
+
+THROW 50001, 'Stock insuffisant', 1;     -- lever sa propre erreur
+</pre>
+                        </article>
+                    </div>
+                    <div class="col-12 col-lg-6">
+                        <article class="cs-card">
+                            <h3>Transactions : tout ou rien</h3>
+                            <p>Plusieurs modifications forment un seul bloc : si l'une échoue, tout est annulé.</p>
+                            <pre>
+SET XACT_ABORT ON;                       -- annule tout automatiquement en cas d'erreur
+BEGIN TRY
+    BEGIN TRANSACTION;
+        UPDATE Produits SET Stock = Stock - 1 WHERE ProduitID = 1;
+        INSERT INTO Commandes (ClientID, Statut, Total) VALUES (1, 'En attente', 79.90);
+    COMMIT TRANSACTION;                  -- valide
+END TRY
+BEGIN CATCH
+    IF @@TRANCOUNT &gt; 0 ROLLBACK TRANSACTION;   -- annule
+    THROW;
+END CATCH;
+</pre>
+                        </article>
+                    </div>
+                    <div class="col-12 col-lg-6">
+                        <article class="cs-card">
+                            <h3>Variable table et table temporaire</h3>
+                            <pre>
+DECLARE @Top TABLE (ProduitID INT, Nom NVARCHAR(100));
+INSERT INTO @Top
+SELECT TOP 3 ProduitID, Nom FROM Produits ORDER BY Prix DESC;
+SELECT * FROM @Top;
+
+SELECT * INTO #Stats FROM Produits WHERE Stock &gt; 0;
+SELECT COUNT(*) FROM #Stats;
+DROP TABLE #Stats;
+</pre>
+                        </article>
+                    </div>
+                    <div class="col-12 col-lg-6">
+                        <article class="cs-card">
+                            <h3>SQL dynamique (sécurisé)</h3>
+                            <pre>
+DECLARE @sql NVARCHAR(MAX) = N'SELECT * FROM Clients WHERE Ville = @v';
+EXEC sp_executesql @sql, N'@v NVARCHAR(50)', @v = N'Alger';   -- ✔ paramétré
+
+-- ✘ DANGER (injection SQL) : ne jamais concaténer une saisie utilisateur
+-- EXEC('SELECT * FROM Clients WHERE Ville = ''' + @saisie + '''');
+</pre>
+                        </article>
+                    </div>
+                    <div class="col-12 col-lg-6">
+                        <article class="cs-card">
+                            <h3>Curseur (à éviter si possible)</h3>
+                            <p>Traite les lignes une par une : lent. Préfère une requête ensembliste.</p>
+                            <pre>
+DECLARE @nom NVARCHAR(50);
+DECLARE cur CURSOR FAST_FORWARD FOR SELECT Nom FROM Clients;
+OPEN cur;
+FETCH NEXT FROM cur INTO @nom;
+WHILE @@FETCH_STATUS = 0
+BEGIN
+    PRINT @nom;
+    FETCH NEXT FROM cur INTO @nom;
+END;
+CLOSE cur;
+DEALLOCATE cur;
+</pre>
+                        </article>
+                    </div>
+                    <div class="col-12 col-lg-6">
+                        <article class="cs-card">
+                            <h3>Variables système utiles</h3>
+                            <div class="table-responsive">
+                                <table class="table sqlserver-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Variable</th>
+                                            <th>Contenu</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><code>@@ROWCOUNT</code></td>
+                                            <td>Lignes touchées par la dernière instruction</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>@@ERROR</code></td>
+                                            <td>Code d'erreur de la dernière instruction (0 = OK)</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>@@TRANCOUNT</code></td>
+                                            <td>Nombre de transactions ouvertes</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>@@IDENTITY</code></td>
+                                            <td>Dernier IDENTITY généré</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>@@FETCH_STATUS</code></td>
+                                            <td>État du dernier <code>FETCH</code> (0 = succès)</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>@@SPID</code></td>
+                                            <td>Numéro de ta session</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>@@VERSION</code></td>
+                                            <td>Version de SQL Server</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <pre>
+UPDATE Produits SET Stock = 0 WHERE CategorieID = 3;
+SELECT @@ROWCOUNT AS LignesModifiees;
+</pre>
+                        </article>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= 13 ADMIN ================= -->
+        <section class="sec" id="admin" data-group="g-admin">
+            <div class="container">
+                <div class="sec-head">
+                    <span class="tag">13</span>
+                    <h2>Administration, sécurité et sauvegarde</h2>
+                    <p>Donner les bons droits, sauvegarder, surveiller et comprendre les performances.</p>
+                </div>
+                <div class="row g-4">
+                    <div class="col-12 col-lg-6">
+                        <article class="cs-card">
+                            <h3>Logins, utilisateurs et droits <span class="chip">DCL</span></h3>
+                            <p>Un <strong>login</strong> ouvre l'accès au serveur ; un <strong>user</strong> donne
+                                l'accès à une base.</p>
+                            <pre>
+CREATE LOGIN appli WITH PASSWORD = 'Un_MotDePasse_Fort_2026!';  -- niveau serveur
+USE Boutique;
+CREATE USER appli FOR LOGIN appli;                              -- niveau base
+
+ALTER ROLE db_datareader ADD MEMBER appli;     -- lecture sur toute la base
+GRANT SELECT, INSERT ON Clients TO appli;      -- droits précis sur une table
+GRANT EXECUTE ON usp_CommandesClient TO appli; -- exécuter une procédure
+DENY  DELETE ON Clients TO appli;              -- interdire (prioritaire)
+REVOKE INSERT ON Clients FROM appli;           -- retirer un droit accordé
+</pre>
+                        </article>
+                    </div>
+                    <div class="col-12 col-lg-6">
+                        <article class="cs-card">
+                            <h3>Rôles courants</h3>
+                            <div class="table-responsive">
+                                <table class="table sqlserver-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Rôle</th>
+                                            <th>Pouvoir</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><code>sysadmin</code></td>
+                                            <td>Tout, sur tout le serveur</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>db_owner</code></td>
+                                            <td>Tout, dans une base</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>db_ddladmin</code></td>
+                                            <td>Créer / modifier les objets</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>db_datareader</code></td>
+                                            <td>Lire toutes les tables</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>db_datawriter</code></td>
+                                            <td>Insérer, modifier, supprimer</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>public</code></td>
+                                            <td>Tout le monde (droits minimaux)</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="note"><span class="lbl">Astuce</span><span>Principe du moindre privilège : donne
+                                    à chaque application uniquement ce dont elle a besoin, jamais
+                                    <code>sa</code>.</span></div>
+                        </article>
+                    </div>
+                    <div class="col-12 col-lg-6">
+                        <article class="cs-card">
+                            <h3>Sauvegarde et restauration</h3>
+                            <pre>
+BACKUP DATABASE Boutique TO DISK = 'C:\Backups\Boutique_full.bak'
+    WITH INIT, COMPRESSION, CHECKSUM;                    -- complète
+
+BACKUP DATABASE Boutique TO DISK = 'C:\Backups\Boutique_diff.bak'
+    WITH DIFFERENTIAL;                                   -- depuis la dernière complète
+
+BACKUP LOG Boutique TO DISK = 'C:\Backups\Boutique_log.trn';   -- journal de transactions
+
+RESTORE DATABASE Boutique FROM DISK = 'C:\Backups\Boutique_full.bak' WITH REPLACE;
+RESTORE HEADERONLY   FROM DISK = 'C:\Backups\Boutique_full.bak';   -- contenu du fichier
+RESTORE VERIFYONLY   FROM DISK = 'C:\Backups\Boutique_full.bak';   -- vérifie le fichier
+</pre>
+                        </article>
+                    </div>
+                    <div class="col-12 col-lg-6">
+                        <article class="cs-card">
+                            <h3>Explorer la base avec les vues système</h3>
+                            <pre>
+SELECT name FROM sys.tables;                           -- tables de la base
+SELECT name, TYPE_NAME(system_type_id) AS Type
+FROM   sys.columns WHERE object_id = OBJECT_ID('Clients');   -- colonnes d'une table
+SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'Clients';
+SELECT name FROM sys.procedures;                       -- procédures stockées
+
+EXEC sp_help 'Clients';                 -- structure complète d'une table
+EXEC sp_helptext 'usp_CommandesClient'; -- code source d'un objet
+EXEC sp_who2;                           -- sessions connectées
+
+-- nombre de lignes par table
+SELECT t.name AS [Table], SUM(p.rows) AS NbLignes
+FROM   sys.tables AS t
+JOIN   sys.partitions AS p ON p.object_id = t.object_id AND p.index_id IN (0, 1)
+GROUP BY t.name;
+</pre>
+                        </article>
+                    </div>
+                    <div class="col-12 col-lg-6">
+                        <article class="cs-card">
+                            <h3>Performances et maintenance</h3>
+                            <pre>
+SET STATISTICS IO ON;      -- nombre de pages lues
+SET STATISTICS TIME ON;    -- temps CPU et temps écoulé
+-- Ctrl+M dans SSMS : plan d'exécution réel
+SELECT * FROM Commandes WHERE ClientID = 1;
+
+UPDATE STATISTICS Commandes;              -- rafraîchit les statistiques
+ALTER INDEX ALL ON Commandes REBUILD;     -- reconstruit les index
+DBCC CHECKDB ('Boutique');                -- vérifie l'intégrité de la base
+</pre>
+                            <div class="note"><span class="lbl">Astuce</span><span>Dans le plan d'exécution, cherche les
+                                    <em>Table Scan</em> / <em>Clustered Index Scan</em> sur de grosses tables : c'est
+                                    souvent un index manquant.</span></div>
+                        </article>
+                    </div>
+                    <div class="col-12 col-lg-6">
+                        <article class="cs-card">
+                            <h3>Importer un fichier CSV</h3>
+                            <pre>
+BULK INSERT Clients
+FROM 'C:\Data\clients.csv'                -- chemin vu par le SERVEUR, pas par ton PC
+WITH (FIELDTERMINATOR = ',',
+      ROWTERMINATOR   = '\n',
+      FIRSTROW        = 2,                -- saute la ligne d'en-tête
+      CODEPAGE        = '65001');         -- UTF-8
+</pre>
+                            <p>Pour un import visuel : clic droit sur la base → <em>Tasks</em> → <em>Import Flat
+                                    File…</em> dans SSMS.</p>
+                        </article>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= 14 PRATIQUES ================= -->
+        <section class="sec sec-dark" id="pratiques" data-group="g-admin">
+            <div class="container">
+                <div class="sec-head">
+                    <span class="tag dark">14</span>
+                    <h2>Bonnes pratiques et erreurs de débutant</h2>
+                    <p>Les pièges classiques, et comment les éviter dès le début.</p>
+                </div>
+                <div class="row g-4">
+                    <div class="col-12 col-lg-6">
+                        <article class="cs-card">
+                            <h3>Les 10 réflexes</h3>
+                            <ol class="plainlist">
+                                <li>Liste les colonnes au lieu de <code>SELECT *</code>.</li>
+                                <li>Teste un <code>UPDATE</code> / <code>DELETE</code> avec un <code>SELECT</code>
+                                    d'abord, puis dans un <code>BEGIN TRAN … ROLLBACK</code>.</li>
+                                <li>Nomme tes contraintes et index : <code>PK_</code>, <code>FK_</code>,
+                                    <code>UQ_</code>, <code>CK_</code>, <code>IX_</code>.
+                                </li>
+                                <li><code>DECIMAL</code> pour l'argent, <code>NVARCHAR</code> pour les noms,
+                                    <code>DATETIME2</code> pour les dates.
+                                </li>
+                                <li>Utilise des alias courts et cohérents dans les jointures.</li>
+                                <li>Passe des paramètres, ne concatène jamais une saisie utilisateur (injection SQL).
+                                </li>
+                                <li>N'applique pas de fonction sur la colonne filtrée : compare avec une plage.</li>
+                                <li>Préfère <code>EXISTS</code> / <code>NOT EXISTS</code> à <code>IN</code> /
+                                    <code>NOT IN</code> sur de grosses tables.
+                                </li>
+                                <li>Ajoute un <code>ORDER BY</code> dès que l'ordre compte : sans lui, aucun ordre n'est
+                                    garanti.</li>
+                                <li>Fais une sauvegarde avant toute opération destructrice.</li>
+                            </ol>
+                        </article>
+                    </div>
+                    <div class="col-12 col-lg-6">
+                        <article class="cs-card">
+                            <h3>Comparer avec NULL</h3>
+                            <pre>
+-- ✘ Ne retourne jamais de ligne
+SELECT * FROM Clients WHERE Email = NULL;
+-- ✔ Correct
+SELECT * FROM Clients WHERE Email IS NULL;
+</pre>
+                            <h3>Division entière</h3>
+                            <pre>
+SELECT 1 / 2;       -- ✘ 0 (entier ÷ entier = entier)
+SELECT 1.0 / 2;     -- ✔ 0.5
+SELECT CAST(Total AS DECIMAL(10,2)) / NULLIF(Quantite, 0) FROM Commandes;
+</pre>
+                        </article>
+                    </div>
+                    <div class="col-12 col-lg-6">
+                        <article class="cs-card">
+                            <h3>NOT IN et les NULL</h3>
+                            <pre>
+-- ✘ Si la sous-requête contient un seul NULL : 0 ligne retournée !
+SELECT * FROM Clients
+WHERE  ClientID NOT IN (SELECT ClientID FROM Commandes);
+
+-- ✔ Sûr
+SELECT * FROM Clients AS cl
+WHERE  NOT EXISTS (SELECT 1 FROM Commandes AS cm WHERE cm.ClientID = cl.ClientID);
+</pre>
+                        </article>
+                    </div>
+                    <div class="col-12 col-lg-6">
+                        <article class="cs-card">
+                            <h3>Fonction sur une colonne indexée</h3>
+                            <pre>
+-- ✘ Lit toute la table : l'index est ignoré
+SELECT * FROM Commandes WHERE YEAR(DateCommande) = 2026;
+
+-- ✔ Utilise l'index (plage de dates)
+SELECT * FROM Commandes
+WHERE  DateCommande &gt;= '2026-01-01' AND DateCommande &lt; '2027-01-01';
+</pre>
+                        </article>
+                    </div>
+                    <div class="col-12 col-lg-6">
+                        <article class="cs-card">
+                            <h3>BETWEEN avec des dates et heures</h3>
+                            <pre>
+-- ✘ Perd les commandes du 30 novembre après 00:00
+SELECT * FROM Commandes
+WHERE  DateCommande BETWEEN '2026-11-01' AND '2026-11-30';
+
+-- ✔ Borne haute exclusive (jour suivant)
+SELECT * FROM Commandes
+WHERE  DateCommande &gt;= '2026-11-01' AND DateCommande &lt; '2026-12-01';
+</pre>
+                        </article>
+                    </div>
+                    <div class="col-12 col-lg-6">
+                        <article class="cs-card">
+                            <h3>UPDATE / DELETE sans WHERE</h3>
+                            <pre>
+-- ✘ Change le prix de TOUS les produits
+UPDATE Produits SET Prix = 0;
+
+-- ✔ Toujours cibler, et vérifier @@ROWCOUNT
+BEGIN TRAN;
+    UPDATE Produits SET Prix = 0 WHERE ProduitID = 4;
+    SELECT @@ROWCOUNT AS LignesModifiees;   -- doit afficher 1
+ROLLBACK;   -- ou COMMIT si tout est bon
+</pre>
+                        </article>
+                    </div>
+                    <div class="col-12 col-lg-6">
+                        <article class="cs-card">
+                            <h3>Injection SQL</h3>
+                            <pre>
+-- ✘ Un utilisateur qui saisit  ' OR 1=1 --  récupère toute la table
+-- 'SELECT * FROM Clients WHERE Nom = ''' + @saisie + ''''
+
+-- ✔ Requête paramétrée
+EXEC sp_executesql
+     N'SELECT * FROM Clients WHERE Nom = @nom',
+     N'@nom NVARCHAR(50)',
+     @nom = @saisie;
+</pre>
+                        </article>
+                    </div>
+                    <div class="col-12 col-lg-6">
+                        <article class="cs-card">
+                            <h3>ORDER BY dans une vue ou sous-requête</h3>
+                            <pre>
+-- ✘ Erreur : ORDER BY sans TOP / OFFSET dans une vue
+CREATE VIEW vw_Produits AS
+SELECT * FROM Produits ORDER BY Prix;
+
+-- ✔ Trie à la lecture de la vue
+SELECT * FROM vw_Produits ORDER BY Prix;
+</pre>
+                        </article>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- ================= FOOTER ================= -->
+    <footer class="foot">
+        <div class="container">
+            <h2 class="foot-title">Bonne<br>requête&nbsp;!</h2>
+            <p>Garde ce cheat sheet ouvert à côté de SSMS, copie les exemples et modifie-les. C'est en cassant des
+                requêtes sur une base de test qu'on apprend le plus vite.</p>
+            <div class="foot-row">
+                <div>
+                    <strong>Créé par Iheb HAFDALLAH</strong><br>
+                    <span>© 2026 · SQL Server Cheat Sheet pour débutants · Bootstrap 5</span>
+                </div>
+                <a class="btn-ghost" href="#top">Retour en haut ↑</a>
+            </div>
+        </div>
+    </footer>
+
+    <button class="totop" id="totop" type="button" aria-label="Retour en haut">↑</button>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script src="js/main.js"></script>
+</body>
+
+</html>
